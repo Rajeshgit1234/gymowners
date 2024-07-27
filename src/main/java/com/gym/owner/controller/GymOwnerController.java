@@ -5,6 +5,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.math.BigInteger;
+
 @RestController
 public class GymOwnerController {
 
@@ -15,7 +17,7 @@ public class GymOwnerController {
 
         try{
 
-            System.out.println("gymOwnerService :: "+gymOwnerService.findAll());
+            System.out.println("gymOwnerService :: "+gymOwnerService.findByUser_id(1).get().getAdress());
 
         }catch(Exception e){}
 
