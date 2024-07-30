@@ -3,6 +3,7 @@ package com.gym.owner.DB;
 import jakarta.persistence.*;
 
 import java.math.BigInteger;
+import java.sql.Timestamp;
 
 @Entity
 @Table(name = "gym_owners")
@@ -21,17 +22,35 @@ public class GymOwner {
 
     private String password;
 
-    private String adress;
+    private String address;
 
+    public Timestamp getCreated() {
+        return created;
+    }
+
+    public void setCreated(Timestamp created) {
+        this.created = created;
+    }
+
+    public Timestamp getUpdated() {
+        return updated;
+    }
+
+    public void setUpdated(Timestamp updated) {
+        this.updated = updated;
+    }
+
+    private Timestamp created;
+    private Timestamp updated;
     private Boolean active;
 
-    public GymOwner(int id, int gym_id, String name, String username, String password, String adress, Boolean active) {
+    public GymOwner(int id, int gym_id, String name, String username, String password, String address, Boolean active) {
         this.id = id;
         this.gym_id = gym_id;
         this.name = name;
         this.username = username;
         this.password = password;
-        this.adress = adress;
+        this.address = address;
         this.active = active;
     }
 
@@ -80,11 +99,11 @@ public class GymOwner {
     }
 
     public String getAdress() {
-        return adress;
+        return address;
     }
 
-    public void setAdress(String adress) {
-        this.adress = adress;
+    public void setAddress(String address) {
+        this.address = address;
     }
 
     public Boolean getActive() {

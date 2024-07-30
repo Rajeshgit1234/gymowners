@@ -23,4 +23,9 @@ public class GymOwnerService {
         return  gymOwnerRepo.findById(user_id);
     }
 
+    public GymOwner loginService(String username,String password){
+
+        return  gymOwnerRepo.loginGymOwners(username,password);
+    }
+
 }

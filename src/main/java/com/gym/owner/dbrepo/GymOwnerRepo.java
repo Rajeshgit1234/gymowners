@@ -10,6 +10,8 @@ import java.util.List;
 
 public interface GymOwnerRepo extends JpaRepository<GymOwner, Integer> {
 
+    @Query("SELECT u FROM GymOwner u WHERE u.username = :username and u.password = :password and u.active=true")
+    public GymOwner loginGymOwners(@Param("username") String username,@Param("password") String password);
 
 
 }
