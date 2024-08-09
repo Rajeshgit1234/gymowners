@@ -83,6 +83,33 @@ public class GymOwnerController {
 
     }
 
+    @PostMapping("/addExpense")
+    public String addExpense(@RequestBody String jsonReq) {
+
+        Boolean status = false;
+        String statusDesc = "Failed";
+        JSONArray expenseList =new JSONArray();
+
+        JSONObject res = new JSONObject();
+        try{
+            System.out.println("gymOwnerService --> addExpense "+jsonReq);
+            JSONObject req = new JSONObject(jsonReq);
+
+            statusDesc = "Operation failed";
+
+
+
+        }catch(Exception e){ e.printStackTrace();}finally {
+            res.put("status",status);
+            res.put("statusDesc",statusDesc);
+            res.put("expenseList",expenseList );
+        }
+        return res.toString();
+
+
+
+    }
+
 
 
 }
