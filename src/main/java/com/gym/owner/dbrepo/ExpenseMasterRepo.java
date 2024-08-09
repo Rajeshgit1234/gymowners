@@ -12,8 +12,8 @@ public interface ExpenseMasterRepo extends JpaRepository<ExpenseMaster, Integer>
 
 
 
-    @Query("SELECT u FROM ExpenseMaster u WHERE  u.status=true order by u.id")
-    public List<ExpenseMaster> getActiveExpenseList();
+    @Query("SELECT u FROM ExpenseMaster u WHERE  u.status=true and u.gym_id in (0,:gym) order by u.id ")
+    public List<ExpenseMaster> getActiveExpenseList(@Param("gym") int gym);
 
 
 }

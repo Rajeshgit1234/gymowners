@@ -19,8 +19,8 @@ public class ExpenseMasterService {
         return  expenseMasterRepo.findAll();
     }
 
-    public List<ExpenseMaster> findActiveExpenseMaster(){
+    public List<ExpenseMaster> findActiveExpenseMaster(int gym){
 
-        return expenseMasterRepo.getActiveExpenseList();
+        return expenseMasterRepo.getActiveExpenseList(gym);
     }
 }
