@@ -10,6 +10,7 @@ import com.gym.owner.dbservice.ExpenseMasterService;
 import com.gym.owner.dbservice.GymExpenseListQueryService;
 import com.gym.owner.dbservice.GymExpenseListService;
 import com.gym.owner.dbservice.GymOwnerService;
+import jakarta.servlet.http.HttpServletResponse;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,7 +47,7 @@ public class GymOwnerController {
         String statusDesc = "Failed";
         JSONObject gymownerJson = new JSONObject();
         JSONArray expenseMasterList =new JSONArray();
-        JSONArray expenseListJson =new JSONArray();
+
         int gym_id =0;
         JSONObject res = new JSONObject();
 
@@ -97,7 +98,6 @@ public class GymOwnerController {
             res.put("statusDesc",statusDesc);
             res.put("gymowner",gymownerJson );
             res.put("expenseMasterList",expenseMasterList );
-            res.put("expenseListJson",expenseListJson );
         }
         return res.toString();
 
@@ -131,12 +131,15 @@ public class GymOwnerController {
 
 
     }
-
+    @CrossOrigin
     @PostMapping("/loadExpenses")
+
     public String loadExpenses(@RequestBody String jsonReq) {
 
         Boolean status = false;
         String statusDesc = "Failed";
+        statusDesc = "Operation failed";
+
         JSONArray expenseJson =new JSONArray();
         DecimalFormat formatter
                 = new DecimalFormat("$#,##0.00");
@@ -167,8 +170,8 @@ public class GymOwnerController {
                 }
 
             }
-            statusDesc = "Operation failed";
-
+            statusDesc = "Data fetched";
+            status=true;
 
 
         }catch(Exception e){ e.printStackTrace();}finally {
@@ -176,6 +179,7 @@ public class GymOwnerController {
             res.put("statusDesc",statusDesc);
             res.put("expenseList",expenseJson );
         }
+
         return res.toString();
 
 
