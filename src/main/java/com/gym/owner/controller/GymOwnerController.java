@@ -4,8 +4,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.util.JSONPObject;
 import com.gym.owner.DB.ExpenseMaster;
 import com.gym.owner.DB.GymExpenseList;
+import com.gym.owner.DB.GymExpenseListQuery;
 import com.gym.owner.DB.GymOwner;
 import com.gym.owner.dbservice.ExpenseMasterService;
+import com.gym.owner.dbservice.GymExpenseListQueryService;
 import com.gym.owner.dbservice.GymExpenseListService;
 import com.gym.owner.dbservice.GymOwnerService;
 import org.json.JSONArray;
@@ -13,8 +15,14 @@ import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+import java.util.Currency;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 @RestController
 public class GymOwnerController {
@@ -28,6 +36,9 @@ public class GymOwnerController {
     @Autowired
     private GymExpenseListService gymExpenseListService;
 
+    @Autowired
+    private GymExpenseListQueryService gymExpenseListQueryService;
+
     @PostMapping("/login")
     public String login(@RequestBody String jsonReq) {
 
@@ -38,6 +49,7 @@ public class GymOwnerController {
         JSONArray expenseListJson =new JSONArray();
         int gym_id =0;
         JSONObject res = new JSONObject();
+
         try{
             System.out.println("gymOwnerService --> jsonReq "+jsonReq);
             JSONObject req = new JSONObject(jsonReq);
@@ -56,7 +68,7 @@ public class GymOwnerController {
                 gymownerJson.put("name", gymOwner.getName());
 
                 List<ExpenseMaster> expenseMaster= expenseMasterService.findActiveExpenseMaster(gym_id);
-                List<GymExpenseList> expenseList= gymExpenseListService.getGymExpenseList(gym_id);
+               // List<GymExpenseListQuery> expenseList= gymExpenseListService.getGymExpenseListQuery(gym_id);
 
                 if(!expenseMaster.isEmpty()){
 
@@ -68,23 +80,7 @@ public class GymOwnerController {
                    }
 
                 }
-                if(!expenseList.isEmpty()){
 
-                   for(GymExpenseList expense:expenseList){
-                        JSONObject expenseItem = new JSONObject();
-                       expenseItem.put("id",expense.getId());
-                       expenseItem.put("exp_id",expense.getExp_id());
-                       expenseItem.put("created_by",expense.getCreated_by());
-                       expenseItem.put("updated_by",expense.getUpdated_by());
-                       expenseItem.put("gym_id",expense.getGym_id());
-                       expenseItem.put("created_on",expense.getCreated_on());
-                       expenseItem.put("updated_on",expense.getUpdated_on());
-                       expenseItem.put("exp_remarks",expense.getExp_remarks());
-                       expenseItem.put("exp_amount",expense.getAmount());
-                       expenseListJson.put(expenseItem);
-                   }
-
-                }
 
 
                 statusDesc = "Login success";
@@ -129,6 +125,56 @@ public class GymOwnerController {
             res.put("status",status);
             res.put("statusDesc",statusDesc);
             res.put("expenseList",expenseList );
+        }
+        return res.toString();
+
+
+
+    }
+
+    @PostMapping("/loadExpenses")
+    public String loadExpenses(@RequestBody String jsonReq) {
+
+        Boolean status = false;
+        String statusDesc = "Failed";
+        JSONArray expenseJson =new JSONArray();
+        DecimalFormat formatter
+                = new DecimalFormat("$#,##0.00");
+        JSONObject res = new JSONObject();
+        try{
+            System.out.println("gymOwnerService --> addExpense "+jsonReq);
+            JSONObject req = new JSONObject(jsonReq);
+            String gym_id_str = req.get("gym_id").toString();
+            int gym_id = Integer.valueOf(gym_id_str);
+            List<Map<String, Object>> expenseList= gymExpenseListService.getGymExpenseListQuery(gym_id);
+
+            if(!expenseList.isEmpty()){
+
+                for(Map<String, Object> expense:expenseList){
+                    JSONObject expenseItem = new JSONObject();
+                    Object amount = ((expense.get("amount") == null) ? "0.00" : expense.get("amount"));
+                    BigDecimal amt = new BigDecimal(amount.toString());
+                    String currStr = formatter.format(amt);
+
+                    expenseItem.put("exp_id",expense.get("id"));
+                    expenseItem.put("created_by",((expense.get("name") == null) ? "N/A" : expense.get("name")));
+                    expenseItem.put("created_on",((expense.get("created_on") == null) ? "N/A" : expense.get("created_on")));
+                    expenseItem.put("expense_item",((expense.get("expense_item") == null) ? "N/A" : expense.get("expense_item")));
+                    expenseItem.put("exp_remarks",((expense.get("exp_remarks") == null) ? "N/A" : expense.get("exp_remarks")));
+                    expenseItem.put("exp_amount",currStr);
+
+                    expenseJson.put(expenseItem);
+                }
+
+            }
+            statusDesc = "Operation failed";
+
+
+
+        }catch(Exception e){ e.printStackTrace();}finally {
+            res.put("status",status);
+            res.put("statusDesc",statusDesc);
+            res.put("expenseList",expenseJson );
         }
         return res.toString();
 
