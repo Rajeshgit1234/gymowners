@@ -25,8 +25,12 @@ public class GymExpenseListService {
        return gymExpenseListRepo.getExpenseList(gym_id);
     }
 
-    public List<Map<String, Object>> getGymExpenseListQuery(int gym_id) {
+    public List<Map<String, Object>> getGymExpenseListQuery(int gym_id,int limit,int offset) {
 
-        return  gymExpenseListQueryRepo.getGymExpenseListQueriesBy(gym_id);
+        return  gymExpenseListQueryRepo.getGymExpenseListQueriesBy(gym_id,limit,offset);
+    }
+    public GymExpenseList saveExpenses(GymExpenseList gymExpenseList) {
+
+        return  gymExpenseListRepo.save(gymExpenseList);
     }
 }

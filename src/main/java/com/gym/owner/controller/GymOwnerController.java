@@ -18,8 +18,10 @@ import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.sql.Timestamp;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.text.SimpleDateFormat;
 import java.util.Currency;
 import java.util.List;
 import java.util.Locale;
@@ -39,6 +41,9 @@ public class GymOwnerController {
 
     @Autowired
     private GymExpenseListQueryService gymExpenseListQueryService;
+
+    private final SimpleDateFormat DATE_TIME_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
+
 
     @PostMapping("/login")
     public String login(@RequestBody String jsonReq) {
@@ -114,21 +119,47 @@ public class GymOwnerController {
         DecimalFormat formatter
                 = new DecimalFormat("₹#,##0.00");
         JSONObject res = new JSONObject();
+
         try{
             System.out.println("gymOwnerService --> addExpense "+jsonReq);
             JSONObject req = new JSONObject(jsonReq);
             String gym_id_str = req.get("gym_id").toString();
-            String user_id = req.get("user_id").toString();
+            String user_id_str = req.get("user_id").toString();
             String expDate = req.get("expDate").toString();
-            String exp_id = req.get("exp_id").toString();
+            String exp_id_str = req.get("exp_id").toString();
             String exp_remarks = req.get("exp_remarks").toString();
-            String exp_amount = req.get("amount").toString();
-
-            statusDesc = "Operation failed";
-
-
+            String exp_amount_str = req.get("amount").toString();
             int gym_id = Integer.valueOf(gym_id_str);
-            List<Map<String, Object>> expenseList= gymExpenseListService.getGymExpenseListQuery(gym_id);
+            int exp_id = Integer.valueOf(exp_id_str);
+            int user_id = Integer.valueOf(user_id_str);
+            float exp_amount = Float.valueOf(exp_amount_str);
+
+
+
+            GymExpenseList gymExpenseList = new GymExpenseList();
+            gymExpenseList.setGym_id(gym_id);
+            gymExpenseList.setExp_remarks(exp_remarks);
+            gymExpenseList.setCreated_by(user_id);
+            gymExpenseList.setUpdated_by(user_id);
+            gymExpenseList.setStatus(true);
+            gymExpenseList.setAmount(exp_amount);
+            gymExpenseList.setExp_id(exp_id);
+            gymExpenseList.setCreated_on(new Timestamp(DATE_TIME_FORMAT.parse(expDate).getTime()));
+            gymExpenseList.setUpdated_on(new Timestamp(DATE_TIME_FORMAT.parse(expDate).getTime()));
+
+           GymExpenseList gymExpenseList1 = gymExpenseListService.saveExpenses(gymExpenseList);
+            if(gymExpenseList1!=null){
+                System.out.println("gymExpenseListService :: "+gymExpenseList1.getGym_id());
+                statusDesc = "Expenses added successfully";
+                status = true;
+            }else{
+
+                statusDesc = "Operation failed";
+            }
+
+
+
+            List<Map<String, Object>> expenseList= gymExpenseListService.getGymExpenseListQuery(gym_id,10,0);
 
             if(!expenseList.isEmpty()){
 
@@ -178,8 +209,10 @@ public class GymOwnerController {
             System.out.println("gymOwnerService --> addExpense "+jsonReq);
             JSONObject req = new JSONObject(jsonReq);
             String gym_id_str = req.get("gym_id").toString();
+            String offset_str = req.get("offset").toString();
             int gym_id = Integer.valueOf(gym_id_str);
-            List<Map<String, Object>> expenseList= gymExpenseListService.getGymExpenseListQuery(gym_id);
+            int offset = Integer.valueOf(offset_str);
+            List<Map<String, Object>> expenseList= gymExpenseListService.getGymExpenseListQuery(gym_id,10,offset);
 
             if(!expenseList.isEmpty()){
 

@@ -1,6 +1,8 @@
 package com.gym.owner.DB;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.sql.Timestamp;
 
@@ -113,7 +115,9 @@ public class GymExpenseList {
     private int id;
     private int exp_id;
     private String  exp_remarks;
+    //@CreationTimestamp
     private Timestamp created_on;
+    //@UpdateTimestamp
     private Timestamp updated_on;
     private int created_by;
     private int updated_by;
