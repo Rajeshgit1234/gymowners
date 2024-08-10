@@ -13,21 +13,27 @@ public class GymList {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
 
+    public boolean isActive() {
+        return active;
+    }
 
+    public void setActive(boolean active) {
+        this.active = active;
+    }
 
     private String name;
     private String description;
     private Timestamp created_on;
     private Timestamp updated_on;
-    private boolean status;
+    private boolean active;
 
-    public GymList(int id, String name, String description, Timestamp created_on, Timestamp updated_on, boolean status) {
+    public GymList(int id, String name, String description, Timestamp created_on, Timestamp updated_on, boolean active) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.created_on = created_on;
         this.updated_on = updated_on;
-        this.status = status;
+        this.active = active;
     }
 
     public GymList() {
@@ -74,11 +80,5 @@ public class GymList {
         this.updated_on = updated_on;
     }
 
-    public boolean isStatus() {
-        return status;
-    }
 
-    public void setStatus(boolean status) {
-        this.status = status;
-    }
 }

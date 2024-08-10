@@ -2,14 +2,8 @@ package com.gym.owner.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.util.JSONPObject;
-import com.gym.owner.DB.ExpenseMaster;
-import com.gym.owner.DB.GymExpenseList;
-import com.gym.owner.DB.GymExpenseListQuery;
-import com.gym.owner.DB.GymOwner;
-import com.gym.owner.dbservice.ExpenseMasterService;
-import com.gym.owner.dbservice.GymExpenseListQueryService;
-import com.gym.owner.dbservice.GymExpenseListService;
-import com.gym.owner.dbservice.GymOwnerService;
+import com.gym.owner.DB.*;
+import com.gym.owner.dbservice.*;
 import jakarta.servlet.http.HttpServletResponse;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -22,10 +16,8 @@ import java.sql.Timestamp;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
-import java.util.Currency;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.time.LocalDate;
+import java.util.*;
 
 @RestController
 public class GymOwnerController {
@@ -43,17 +35,19 @@ public class GymOwnerController {
     private GymExpenseListQueryService gymExpenseListQueryService;
 
     private final SimpleDateFormat DATE_TIME_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
+    @Autowired
+    private GymListService gymListService;
 
-
+    @CrossOrigin
     @PostMapping("/login")
     public String login(@RequestBody String jsonReq) {
 
         Boolean status = false;
         String statusDesc = "Failed";
-        JSONObject gymownerJson = new JSONObject();
-        JSONArray expenseMasterList =new JSONArray();
+
 
         int gym_id =0;
+        int user_id =0;
         JSONObject res = new JSONObject();
 
         try{
@@ -66,8 +60,9 @@ public class GymOwnerController {
 
                 System.out.println("gymOwnerService :: "+gymOwner.getGym_id());
                 gym_id = gymOwner.getGym_id();
+                user_id = gymOwner.getUser_id();
 
-                gymownerJson.put("userid", gymOwner.getUser_id());
+               /* gymownerJson.put("userid", gymOwner.getUser_id());
 
                 gymownerJson.put("gymid", gymOwner.getGym_id());
                 gymownerJson.put("address", gymOwner.getAdress());
@@ -87,6 +82,7 @@ public class GymOwnerController {
 
                 }
 
+*/
 
 
                 statusDesc = "Login success";
@@ -98,6 +94,67 @@ public class GymOwnerController {
 
             }
 
+        }catch(Exception e){ e.printStackTrace();}finally {
+            res.put("status",status);
+            res.put("statusDesc",statusDesc);
+            res.put("gym_id",gym_id );
+            res.put("user_id",user_id );
+        }
+        return res.toString();
+
+
+
+    }
+    @PostMapping("/homeData")
+    public String homeData(@RequestBody String jsonReq) {
+
+        Boolean status = false;
+        String statusDesc = "Failed";
+        JSONObject gymownerJson = new JSONObject();
+        JSONArray expenseMasterList =new JSONArray();
+
+        int gym_id =0;
+        int user_id =0;
+        JSONObject res = new JSONObject();
+
+        try{
+            System.out.println("gymOwnerService --> jsonReq "+jsonReq);
+            JSONObject req = new JSONObject(jsonReq);
+            String gym_id_str = req.get("gym_id").toString();
+            String user_id_str = req.get("user_id").toString();
+             gym_id = Integer.valueOf(gym_id_str);
+            user_id = Integer.valueOf(user_id_str);
+            LocalDate todaydate = LocalDate.now();
+            System.out.println("Months first date in yyyy-mm-dd: " +todaydate.withDayOfMonth(1));
+            Optional<GymOwner> owner=  gymOwnerService.findByUser_id(user_id);
+            Optional<GymList> gym=  gymListService.findById(gym_id);
+
+
+            List<Map<String, Object>> expenseList= gymExpenseListService.getExpenseSumMonth(gym_id,new Timestamp(DATE_TIME_FORMAT.parse(todaydate.withDayOfMonth(1).toString()).getTime()));
+            System.out.println("Months first date in yyyy-mm-dd: " +todaydate.withDayOfMonth(1));
+
+
+            gymownerJson.put("userid", owner.get().getUser_id());
+
+            gymownerJson.put("gymid", owner.get().getGym_id());
+            gymownerJson.put("address", owner.get().getAdress());
+            gymownerJson.put("name", owner.get().getName());
+
+            List<ExpenseMaster> expenseMaster= expenseMasterService.findActiveExpenseMaster(gym_id);
+            // List<GymExpenseListQuery> expenseList= gymExpenseListService.getGymExpenseListQuery(gym_id);
+
+            if(!expenseMaster.isEmpty()){
+
+                for(ExpenseMaster expense:expenseMaster){
+                    JSONObject expenseJson = new JSONObject();
+                    expenseJson.put("expId",expense.getId());
+                    expenseJson.put("expItem",expense.getExpense_item());
+                    expenseMasterList.put(expenseJson);
+                }
+
+            }
+            status = true;
+            statusDesc = "Success";
         }catch(Exception e){ e.printStackTrace();}finally {
             res.put("status",status);
             res.put("statusDesc",statusDesc);

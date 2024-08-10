@@ -8,6 +8,7 @@ import com.gym.owner.dbrepo.GymExpenseListRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
 
@@ -32,5 +33,9 @@ public class GymExpenseListService {
     public GymExpenseList saveExpenses(GymExpenseList gymExpenseList) {
 
         return  gymExpenseListRepo.save(gymExpenseList);
+    }
+    public List<Map<String, Object>>  getExpenseSumMonth(int gym_id, Timestamp str_date) {
+
+        return  gymExpenseListRepo.getExpenseSumMonth(gym_id,str_date);
     }
 }
