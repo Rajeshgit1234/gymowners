@@ -20,7 +20,7 @@ public interface GymExpenseListRepo extends JpaRepository<GymExpenseList, Intege
 
     public List<GymExpenseList> getExpenseList(@Param("gym") int gym);
 
-    @Query("SELECT sum(u.amount) FROM GymExpenseList u WHERE  u.status=true and u.gym_id in (0,:gym) and u.created_on>:dateStr ")
+    @Query("SELECT sum(u.amount) as amount FROM GymExpenseList u WHERE  u.status=true and u.gym_id in (0,:gym) and u.created_on>:dateStr ")
     public List<Map<String, Object>>  getExpenseSumMonth(@Param("gym") int gym, @Param("dateStr") Timestamp dateStr);
 
 }

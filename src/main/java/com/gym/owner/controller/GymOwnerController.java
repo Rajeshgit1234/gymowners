@@ -115,8 +115,10 @@ public class GymOwnerController {
 
         int gym_id =0;
         int user_id =0;
+        String  exp_total ="0";
         JSONObject res = new JSONObject();
-
+        DecimalFormat formatter
+                = new DecimalFormat("₹#,##0.00");
         try{
             System.out.println("gymOwnerService --> jsonReq "+jsonReq);
             JSONObject req = new JSONObject(jsonReq);
@@ -153,11 +155,25 @@ public class GymOwnerController {
                 }
 
             }
+            if(!expenseList.isEmpty()){
+
+                for(Map<String, Object> expense:expenseList){
+                    JSONObject expenseItem = new JSONObject();
+                 Object amount = ((expense.get("amount") == null) ? "0.00" : expense.get("amount"));
+                    Float amt = Float.valueOf(amount.toString());
+                    exp_total = formatter.format(amt);
+
+
+                }
+
+            }
+
             status = true;
             statusDesc = "Success";
         }catch(Exception e){ e.printStackTrace();}finally {
             res.put("status",status);
             res.put("statusDesc",statusDesc);
+            res.put("exp_total",exp_total);
             res.put("gymowner",gymownerJson );
             res.put("expenseMasterList",expenseMasterList );
         }
