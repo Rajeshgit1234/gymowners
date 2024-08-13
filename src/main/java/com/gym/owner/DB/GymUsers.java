@@ -1,14 +1,15 @@
 package com.gym.owner.DB;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
-import java.math.BigInteger;
 import java.sql.Timestamp;
 
 @Entity
-@Table(name = "gym_owners")
+@Table(name = "gym_users")
 
-public class GymOwner {
+public class GymUsers {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -24,46 +25,38 @@ public class GymOwner {
 
     private String address;
 
-    public Timestamp getCreated() {
-        return created;
-    }
-
-    public void setCreated(Timestamp created) {
-        this.created = created;
-    }
-
-    public Timestamp getUpdated() {
-        return updated;
-    }
-
-    public void setUpdated(Timestamp updated) {
-        this.updated = updated;
-    }
-
+    @CreationTimestamp
     private Timestamp created;
+    @UpdateTimestamp
     private Timestamp updated;
-    private Boolean active;
 
-    public GymOwner(int id, int gym_id, String name, String username, String password, String address, Boolean active) {
+
+    private Boolean active;
+    private int profile_id;
+
+    public GymUsers(int id, int gym_id, String name, String username, String password, String address, Timestamp created, Timestamp updated, Boolean active, int profile_id) {
         this.id = id;
         this.gym_id = gym_id;
         this.name = name;
         this.username = username;
         this.password = password;
         this.address = address;
+        this.created = created;
+        this.updated = updated;
         this.active = active;
+        this.profile_id = profile_id;
     }
 
-    public GymOwner() {
+    public GymUsers() {
 
     }
 
-    public int getUser_id() {
+    public int getId() {
         return id;
     }
 
-    public void setUser_id(int user_id) {
-        this.id = user_id;
+    public void setId(int id) {
+        this.id = id;
     }
 
     public int getGym_id() {
@@ -98,12 +91,28 @@ public class GymOwner {
         this.password = password;
     }
 
-    public String getAdress() {
+    public String getAddress() {
         return address;
     }
 
     public void setAddress(String address) {
         this.address = address;
+    }
+
+    public Timestamp getCreated() {
+        return created;
+    }
+
+    public void setCreated(Timestamp created) {
+        this.created = created;
+    }
+
+    public Timestamp getUpdated() {
+        return updated;
+    }
+
+    public void setUpdated(Timestamp updated) {
+        this.updated = updated;
     }
 
     public Boolean getActive() {
@@ -112,5 +121,13 @@ public class GymOwner {
 
     public void setActive(Boolean active) {
         this.active = active;
+    }
+
+    public int getProfile_id() {
+        return profile_id;
+    }
+
+    public void setProfile_id(int profile_id) {
+        this.profile_id = profile_id;
     }
 }

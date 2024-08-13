@@ -1,7 +1,6 @@
 package com.gym.owner.dbrepo;
 
 import com.gym.owner.DB.ExpenseMaster;
-import com.gym.owner.DB.GymOwner;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

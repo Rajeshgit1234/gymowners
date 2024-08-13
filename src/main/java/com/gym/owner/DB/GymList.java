@@ -1,6 +1,8 @@
 package com.gym.owner.DB;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.sql.Timestamp;
 
@@ -12,24 +14,23 @@ public class GymList {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
-
-    public boolean isActive() {
-        return active;
-    }
-
-    public void setActive(boolean active) {
-        this.active = active;
-    }
-
+    private int created_by;
     private String name;
+    private String gym_name;
+    private String adress;
     private String description;
+    @CreationTimestamp
     private Timestamp created_on;
+    @UpdateTimestamp
     private Timestamp updated_on;
     private boolean active;
 
-    public GymList(int id, String name, String description, Timestamp created_on, Timestamp updated_on, boolean active) {
+    public GymList(int id, int created_by, String name, String gym_name, String adress, String description, Timestamp created_on, Timestamp updated_on, boolean active) {
         this.id = id;
+        this.created_by = created_by;
         this.name = name;
+        this.gym_name = gym_name;
+        this.adress = adress;
         this.description = description;
         this.created_on = created_on;
         this.updated_on = updated_on;
@@ -40,6 +41,7 @@ public class GymList {
 
     }
 
+
     public int getId() {
         return id;
     }
@@ -48,12 +50,36 @@ public class GymList {
         this.id = id;
     }
 
+    public int getCreated_by() {
+        return created_by;
+    }
+
+    public void setCreated_by(int created_by) {
+        this.created_by = created_by;
+    }
+
     public String getName() {
         return name;
     }
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getGym_name() {
+        return gym_name;
+    }
+
+    public void setGym_name(String gym_name) {
+        this.gym_name = gym_name;
+    }
+
+    public String getAdress() {
+        return adress;
+    }
+
+    public void setAdress(String adress) {
+        this.adress = adress;
     }
 
     public String getDescription() {
@@ -80,5 +106,11 @@ public class GymList {
         this.updated_on = updated_on;
     }
 
+    public boolean isActive() {
+        return active;
+    }
 
+    public void setActive(boolean active) {
+        this.active = active;
+    }
 }

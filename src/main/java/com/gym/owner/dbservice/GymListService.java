@@ -1,7 +1,6 @@
 package com.gym.owner.dbservice;
 
 import com.gym.owner.DB.GymList;
-import com.gym.owner.DB.GymOwner;
 import com.gym.owner.dbrepo.GymListRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,5 +18,9 @@ public class GymListService {
         return  gymListRepo.findById(gymId);
     }
 
+    public GymList saveGym(GymList gymList) {
+
+        return  gymListRepo.save(gymList);
+    }
 
 }
