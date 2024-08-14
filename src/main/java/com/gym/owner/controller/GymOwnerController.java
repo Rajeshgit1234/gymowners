@@ -521,6 +521,79 @@ public class GymOwnerController {
 
     }
 
+    @CrossOrigin
+    @PostMapping("/loadProfile")
+
+    public String loadProfile(@RequestBody String jsonReq) {
+
+        Boolean status = false;
+        String statusDesc = "Failed";
+
+
+        JSONObject profile =new JSONObject();
+
+        JSONObject res = new JSONObject();
+        try{
+            System.out.println("gymOwnerService --> loadProfile "+jsonReq);
+            JSONObject req = new JSONObject(jsonReq);
+            String user_id_str = req.get("user_id").toString();
+            int user_id = Integer.valueOf(user_id_str);
+            Optional<GymUsers> gymUsersList = gymUsersService.findByUser_id(user_id);
+            if(!gymUsersList.isEmpty()){
+
+                GymUsers gymUsers = gymUsersList.get();
+                if(gymUsersList.get()!=null){
+
+                    profile.put("username",gymUsers.getUsername());
+                    profile.put("name",gymUsers.getName());
+                    profile.put("address",gymUsers.getAddress());
+                   // SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy HH:mm:ss");
+                    //Date date2 = dateFormat.parse(gymUsers.getCreated().toString());
+                    //Date date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z").parse(gymUsers.getCreated().toString());
+                    //String date2 =  new SimpleDateFormat("dd.MM.yyyy HH:mm:ss").format(date);
+
+                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                    Date date = simpleDateFormat.parse(gymUsers.getCreated().toString());
+
+
+                    profile.put("created",date);
+                    Optional<GymList> gymList = gymListService.findById(gymUsers.getGym_id());
+                    if(gymList.isPresent()){
+
+                        if(gymList.get()!=null){
+
+                            profile.put("gym",gymList.get().getGym_name());
+                            profile.put("gymaddress",gymList.get().getAdress());
+                        }
+                    }
+
+                    Optional<GymProfiles> profiles = gymProfilesService.findById(gymUsers.getProfile_id());
+                    if(profiles.isPresent()){
+                        if(profiles.get()!=null){
+                            profile.put("profile",profiles.get().getProfile_name());
+                        }
+                    }
+
+
+                }
+
+            }
+            statusDesc = "Data fetched";
+            status=true;
+
+
+        }catch(Exception e){ e.printStackTrace();}finally {
+            res.put("status",status);
+            res.put("statusDesc",statusDesc);
+            res.put("profile",profile );
+        }
+
+        return res.toString();
+
+
+
+    }
+
 
 
 }
