@@ -18,7 +18,7 @@ public interface GymExpenseListQueryRepo extends JpaRepository<GymExpenseListQue
     //public List<GymExpenseListQuery> getExpenseList(@Param("gym") int gym);
 
     @Query(
-            value = "SELECT list.id,owner.name,list.created_on,list.amount ,list.exp_id,master.expense_item,list.exp_remarks FROM gym_expense_list list,gym_users  owner,expense_master  master WHERE  list.status=true and list.gym_id in (:gym)  and list.exp_id=master.id and list.created_by=owner.id  order by list.created_by desc LIMIT :limit OFFSET :offset",
+            value = "SELECT list.id,owner.name,list.created_on,list.amount ,list.exp_id,master.expense_item,list.exp_remarks FROM gym_expense_list list,gym_users  owner,expense_master  master WHERE  list.status=true and list.gym_id in (:gym)  and list.exp_id=master.id and list.created_by=owner.id  order by list.created_on desc LIMIT :limit OFFSET :offset",
             nativeQuery = true
     )
     List<Map<String, Object>>  getGymExpenseListQueriesBy(@Param("gym") int gym,@Param("limit") int limit, @Param("offset") int offset);
