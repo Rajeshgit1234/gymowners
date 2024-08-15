@@ -27,4 +27,8 @@ public class GymProfilesService {
 
         return  gymProfilesRepo.findById(gymId);
     }
+    public GymProfiles checkProfileExist(String profile_name,Integer gymId){
+
+        return  gymProfilesRepo.findGymProfilesByName(profile_name,1);
+    }
 }

@@ -371,7 +371,7 @@ public class GymOwnerController {
 
 
     }
-@CrossOrigin
+    @CrossOrigin
     @PostMapping("/addNewGym")
     public String addNewGym(@RequestBody String jsonReq) {
 
@@ -416,6 +416,62 @@ public class GymOwnerController {
             res.put("status",status);
             res.put("statusDesc",statusDesc);
             res.put("gym_id",gym_id );
+        }
+        return res.toString();
+
+
+
+    }
+    @CrossOrigin
+    @PostMapping("/addNewProfile")
+    public String addNewProfile(@RequestBody String jsonReq) {
+
+        Boolean status = false;
+        String statusDesc = "Failed";
+        int profile_id = 0;
+        JSONObject res = new JSONObject();
+
+        try {
+            System.out.println("gymOwnerService --> addNewGym " + jsonReq);
+            JSONObject req = new JSONObject(jsonReq);
+            String gym_id_str = req.get("gym_id").toString();
+            String profile_name = req.get("profile_name").toString();
+            String added_id_str = req.get("user_id").toString();
+            int user_id = Integer.valueOf(added_id_str);
+            int gym_id = Integer.valueOf(gym_id_str);
+
+
+            if(gymProfilesService.checkProfileExist(profile_name,gym_id)==null) {
+                GymProfiles profile = new GymProfiles();
+                profile.setStatus(true);
+                profile.setProfile_name(profile_name);
+                profile.setGym_id(gym_id);
+                GymProfiles respProfile =gymProfilesService.saveNewProfile(profile);
+                if(respProfile != null){
+                    System.out.println("gymExpenseListService :: " + respProfile.getId());
+                    statusDesc = "Profile added successfully";
+                    status=true;
+                    profile_id = respProfile.getId();
+                }else{
+
+                    statusDesc = "Operation failed";
+                }
+
+
+            }else {
+
+                statusDesc = "Same profile already exists";
+
+            }
+
+
+
+
+
+        }catch(Exception e){ e.printStackTrace();}finally {
+            res.put("status",status);
+            res.put("statusDesc",statusDesc);
+            res.put("profile_id",profile_id );
         }
         return res.toString();
 

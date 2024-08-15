@@ -13,6 +13,10 @@ public class GymProfiles {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
+
+
+
+    private int gym_id;
     private String profile_name;
     @CreationTimestamp
     private Timestamp created_at;
@@ -21,8 +25,9 @@ public class GymProfiles {
     private boolean status;
 
 
-    public GymProfiles(int id, String profile_name, Timestamp created_at, Timestamp updated_at, boolean status) {
+    public GymProfiles(int id,int gym_id, String profile_name, Timestamp created_at, Timestamp updated_at, boolean status) {
         this.id = id;
+        this.gym_id = gym_id;
         this.profile_name = profile_name;
         this.created_at = created_at;
         this.updated_at = updated_at;
@@ -71,5 +76,12 @@ public class GymProfiles {
 
     public void setStatus(boolean status) {
         this.status = status;
+    }
+    public int getGym_id() {
+        return gym_id;
+    }
+
+    public void setGym_id(int gym_id) {
+        this.gym_id = gym_id;
     }
 }
