@@ -15,7 +15,7 @@ public class GymUsers {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
 
-    private int gym_id;
+    private int gym;
 
     private String name;
 
@@ -32,11 +32,13 @@ public class GymUsers {
 
 
     private Boolean active;
-    private int profile_id;
+    private int profile;
+    private String phone;
+    private String email;
 
-    public GymUsers(int id, int gym_id, String name, String username, String password, String address, Timestamp created, Timestamp updated, Boolean active, int profile_id) {
+    public GymUsers(int id, int gym, String name, String username, String password, String address, Timestamp created, Timestamp updated, Boolean active, int profile, String phone, String email) {
         this.id = id;
-        this.gym_id = gym_id;
+        this.gym = gym;
         this.name = name;
         this.username = username;
         this.password = password;
@@ -44,7 +46,9 @@ public class GymUsers {
         this.created = created;
         this.updated = updated;
         this.active = active;
-        this.profile_id = profile_id;
+        this.profile = profile;
+        this.phone = phone;
+        this.email = email;
     }
 
     public GymUsers() {
@@ -59,12 +63,12 @@ public class GymUsers {
         this.id = id;
     }
 
-    public int getGym_id() {
-        return gym_id;
+    public int getGym() {
+        return gym;
     }
 
-    public void setGym_id(int gym_id) {
-        this.gym_id = gym_id;
+    public void setGym(int gym) {
+        this.gym = gym;
     }
 
     public String getName() {
@@ -123,11 +127,27 @@ public class GymUsers {
         this.active = active;
     }
 
-    public int getProfile_id() {
-        return profile_id;
+    public int getProfile() {
+        return profile;
     }
 
-    public void setProfile_id(int profile_id) {
-        this.profile_id = profile_id;
+    public void setProfile(int profile) {
+        this.profile = profile;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 }

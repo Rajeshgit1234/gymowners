@@ -22,6 +22,10 @@ public class GymUsersService {
 
         return  gymUsersRepo.findById(user_id);
     }
+    public Optional<GymUsers> findCustomers(int gym_id){
+
+        return gymUsersRepo.findByActiveAndProfileAndGym(true,253,gym_id);
+    }
 
     public GymUsers loginService(String username, String password){
 

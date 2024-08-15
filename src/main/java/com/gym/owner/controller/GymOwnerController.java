@@ -55,8 +55,8 @@ public class GymOwnerController {
             GymUsers gymUsers = gymUsersService.loginService(req.get("username").toString(),req.get("password").toString());
             if(gymUsers !=null){
 
-                System.out.println("gymOwnerService :: "+ gymUsers.getGym_id());
-                gym_id = gymUsers.getGym_id();
+                System.out.println("gymOwnerService :: "+ gymUsers.getGym());
+                gym_id = gymUsers.getGym();
                 user_id = gymUsers.getId();
 
                /* gymownerJson.put("userid", gymOwner.getUser_id());
@@ -135,9 +135,12 @@ public class GymOwnerController {
 
             gymuser_Json.put("userid", owner.get().getId());
 
-            gymuser_Json.put("gymid", owner.get().getGym_id());
+            gymuser_Json.put("gymid", owner.get().getGym());
             gymuser_Json.put("address", owner.get().getAddress());
             gymuser_Json.put("name", owner.get().getName());
+            gymuser_Json.put("phone", owner.get().getPhone());
+            gymuser_Json.put("profile", owner.get().getProfile());
+            gymuser_Json.put("email", owner.get().getEmail());
 
             List<ExpenseMaster> expenseMaster= expenseMasterService.findActiveExpenseMaster(gym_id);
             // List<GymExpenseListQuery> expenseList= gymExpenseListService.getGymExpenseListQuery(gym_id);
@@ -268,8 +271,8 @@ public class GymOwnerController {
     }
 
     @CrossOrigin
-    @PostMapping("/addNewGymOwner")
-    public String addNewGymOwner(@RequestBody String jsonReq) {
+    @PostMapping("/addNewGymUser")
+    public String addNewGymUser(@RequestBody String jsonReq) {
 
         Boolean status = false;
         String statusDesc = "Failed";
@@ -285,18 +288,22 @@ public class GymOwnerController {
             String password = req.get("password").toString();
             String address = req.get("address").toString();
             String profile_id_str = req.get("profile_id").toString();
+            String ph = req.get("phone").toString();
+            String email = req.get("email").toString();
             int gym_id = Integer.valueOf(gym_id_str);
             int profile_id = Integer.valueOf(profile_id_str);
 
 
             GymUsers gymUsers = new GymUsers();
-            gymUsers.setGym_id(gym_id);
+            gymUsers.setGym(gym_id);
             gymUsers.setName(name);
             gymUsers.setUsername(username);
             gymUsers.setPassword(password);
             gymUsers.setAddress(address);
-            gymUsers.setProfile_id(profile_id);
+            gymUsers.setProfile(profile_id);
             gymUsers.setActive(true);
+            gymUsers.setPhone(ph);
+            gymUsers.setEmail(email);
             GymUsers owner = gymUsersService.findUserExist(gymUsers);
             GymUsers gymUsers1 = new GymUsers();
             if (owner == null){
@@ -440,8 +447,8 @@ public class GymOwnerController {
             int user_id = Integer.valueOf(added_id_str);
             int gym_id = Integer.valueOf(gym_id_str);
 
-
-            if(gymProfilesService.checkProfileExist(profile_name,gym_id)==null) {
+            GymProfiles extProfile = gymProfilesService.checkProfileExist(profile_name,gym_id);
+            if(extProfile==null) {
                 GymProfiles profile = new GymProfiles();
                 profile.setStatus(true);
                 profile.setProfile_name(profile_name);
@@ -603,6 +610,8 @@ public class GymOwnerController {
                     profile.put("username",gymUsers.getUsername());
                     profile.put("name",gymUsers.getName());
                     profile.put("address",gymUsers.getAddress());
+                    profile.put("phone",gymUsers.getPhone());
+                    profile.put("email",gymUsers.getEmail());
                    // SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy HH:mm:ss");
                     //Date date2 = dateFormat.parse(gymUsers.getCreated().toString());
                     //Date date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z").parse(gymUsers.getCreated().toString());
@@ -613,7 +622,7 @@ public class GymOwnerController {
 
 
                     profile.put("created",date);
-                    Optional<GymList> gymList = gymListService.findById(gymUsers.getGym_id());
+                    Optional<GymList> gymList = gymListService.findById(gymUsers.getGym());
                     if(gymList.isPresent()){
 
                         if(gymList.get()!=null){
@@ -623,13 +632,61 @@ public class GymOwnerController {
                         }
                     }
 
-                    Optional<GymProfiles> profiles = gymProfilesService.findById(gymUsers.getProfile_id());
+                    Optional<GymProfiles> profiles = gymProfilesService.findById(gymUsers.getProfile());
                     if(profiles.isPresent()){
                         if(profiles.get()!=null){
                             profile.put("profile",profiles.get().getProfile_name());
                         }
                     }
 
+
+                }
+
+            }
+            statusDesc = "Data fetched";
+            status=true;
+
+
+        }catch(Exception e){ e.printStackTrace();}finally {
+            res.put("status",status);
+            res.put("statusDesc",statusDesc);
+            res.put("profile",profile );
+        }
+
+        return res.toString();
+
+
+
+    }
+
+    @CrossOrigin
+    @PostMapping("/loadGymCustomers")
+
+    public String loadGymCustomers(@RequestBody String jsonReq) {
+
+        Boolean status = false;
+        String statusDesc = "Failed";
+
+
+        JSONArray profile =new JSONArray();
+
+        JSONObject res = new JSONObject();
+        try{
+            System.out.println("gymOwnerService --> loadProfile "+jsonReq);
+            JSONObject req = new JSONObject(jsonReq);
+            String gym_id_str = req.get("gym_id").toString();
+            int gym_id = Integer.valueOf(gym_id_str);
+            Optional<GymUsers> gymUsersList = gymUsersService.findCustomers(gym_id);
+            if(!gymUsersList.isEmpty()){
+
+
+                if(gymUsersList.get()!=null){
+                    JSONObject profileEnt = new JSONObject();
+                    profileEnt.put("username",gymUsersList.get().getUsername());
+                    profileEnt.put("name",gymUsersList.get().getName());
+                    profileEnt.put("phone",gymUsersList.get().getPhone());
+                    profileEnt.put("id",gymUsersList.get().getId());
+                    profile.put(profileEnt);
 
                 }
 
