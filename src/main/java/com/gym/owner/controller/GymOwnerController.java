@@ -34,6 +34,8 @@ public class GymOwnerController {
     private GymListService gymListService;
     @Autowired
     private GymProfilesService gymProfilesService;
+    @Autowired
+    private GymUserPaymentsService   gymUserPaymentsService;
 
     @CrossOrigin
     @PostMapping("/login")
@@ -699,6 +701,116 @@ public class GymOwnerController {
             res.put("status",status);
             res.put("statusDesc",statusDesc);
             res.put("profile",profile );
+        }
+
+        return res.toString();
+
+
+
+    }
+
+    @CrossOrigin
+    @PostMapping("/loadCustomerPayments")
+
+    public String loadCustomerPayments(@RequestBody String jsonReq) {
+
+        Boolean status = false;
+        String statusDesc = "Failed";
+        statusDesc = "Operation failed";
+
+        JSONArray paymentsJson =new JSONArray();
+        DecimalFormat formatter
+                = new DecimalFormat("₹#,##0.00");
+        JSONObject res = new JSONObject();
+        try{
+            System.out.println("gymOwnerService --> addExpense "+jsonReq);
+            JSONObject req = new JSONObject(jsonReq);
+            String gym_id_str = req.get("gym_id").toString();
+            String offset_str = req.get("offset").toString();
+            int gym_id = Integer.valueOf(gym_id_str);
+            int offset = Integer.valueOf(offset_str);
+            List<Map<String, Object>> paymentsList= gymUserPaymentsService.getGymPayments(gym_id,offset);
+
+            if(!paymentsList.isEmpty()){
+
+                for(Map<String, Object> pay:paymentsList){
+                    JSONObject expenseItem = new JSONObject();
+
+
+                    paymentsJson.put(expenseItem);
+                }
+
+            }
+            statusDesc = "Data fetched";
+            status=true;
+
+
+        }catch(Exception e){ e.printStackTrace();}finally {
+            res.put("status",status);
+            res.put("statusDesc",statusDesc);
+            res.put("expenseList",paymentsJson );
+        }
+
+        return res.toString();
+
+
+
+    }
+@CrossOrigin
+    @PostMapping("/markCustomerPayments")
+
+    public String markCustomerPayments(@RequestBody String jsonReq) {
+
+        Boolean status = false;
+        String statusDesc = "Failed";
+        statusDesc = "Operation failed";
+    int paymentid=0;
+            JSONObject res = new JSONObject();
+        try{
+            System.out.println("gymOwnerService --> addExpense "+jsonReq);
+            JSONObject req = new JSONObject(jsonReq);
+            String gym_id_str = req.get("gym_id").toString();
+            String customer_str = req.get("customer").toString();
+            String addedby_str = req.get("addedby").toString();
+            String amount_str = req.get("amount").toString();
+            String description = req.get("description").toString();
+            String subscription = req.get("subscription").toString();
+
+            int gym_id = Integer.valueOf(gym_id_str);
+            int customer = Integer.valueOf(customer_str);
+            int addedby = Integer.valueOf(addedby_str);
+            float amount = Float.valueOf(amount_str);
+
+            GymUserPayments gymUserPayments = new GymUserPayments();
+            gymUserPayments.setGym(gym_id);
+            gymUserPayments.setCustomer(customer);
+            gymUserPayments.setAddedby(addedby);
+            gymUserPayments.setAmount(amount);
+            gymUserPayments.setDescription(description);
+            gymUserPayments.setSubscription(subscription);
+            gymUserPayments.setStatus(true);
+
+
+           GymUserPayments newGymUserPayments = new GymUserPayments();
+            newGymUserPayments = gymUserPaymentsService.InsertPayments(gymUserPayments);
+            if(newGymUserPayments!=null){
+
+                paymentid = newGymUserPayments.getId();
+                statusDesc = "Data saved";
+                status=true;
+
+            }else{
+
+                statusDesc = "Insertion failed";
+                status=false;
+            }
+
+
+
+        }catch(Exception e){ e.printStackTrace();}finally {
+            res.put("status",status);
+            res.put("statusDesc",statusDesc);
+            res.put("paymentid",paymentid );
         }
 
         return res.toString();
