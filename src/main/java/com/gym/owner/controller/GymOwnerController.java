@@ -545,11 +545,35 @@ public class GymOwnerController {
         try{
             System.out.println("gymOwnerService --> addExpense "+jsonReq);
             JSONObject req = new JSONObject(jsonReq);
-            String gym_id_str = req.get("gym_id").toString();
-            String offset_str = req.get("offset").toString();
-            int gym_id = Integer.valueOf(gym_id_str);
-            int offset = Integer.valueOf(offset_str);
-            List<Map<String, Object>> expenseList= gymExpenseListService.getGymExpenseListQuery(gym_id,10,offset);
+            /*String gym_id_str = req.get("gym_id").toString();
+            String from = req.get("from").toString();
+            String to = req.get("to").toString();
+            String type_str = req.get("type").toString();
+            String offset_str = req.get("offset").toString();*/
+            int gym_id =Common.inputIntParaNullCheck(req,"gym_id");
+            String from =Common.inputStringParaNullCheck(req,"from");
+            String to =Common.inputStringParaNullCheck(req,"to");
+            int type =Common.inputIntParaNullCheck(req,"type");
+            int offset =Common.inputIntParaNullCheck(req,"offset");
+
+            List<Map<String, Object>> expenseList = new ArrayList<>();
+
+
+
+           if(from.length()!=0 & to.length()!=0 & type!=0){
+
+               expenseList= gymExpenseListService.getGymExpenseListQueryFilterDateAndType(gym_id,type,new Timestamp(DATE_TIME_FORMAT.parse(from).getTime()),new Timestamp(DATE_TIME_FORMAT.parse(to).getTime()),10,offset);
+           }else if(from.length()==0 && to.length()==0 & type!=0){
+
+               expenseList= gymExpenseListService.getGymExpenseListQueryFilterType(gym_id,type,10,offset);
+           }else if(from.length()!=0 && to.length()!=0 & type==0){
+               expenseList= gymExpenseListService.getGymExpenseListQueryFilterDate(gym_id,new Timestamp(DATE_TIME_FORMAT.parse(from).getTime()),new Timestamp(DATE_TIME_FORMAT.parse(to).getTime()),10,offset);
+           }else{
+
+               expenseList= gymExpenseListService.getGymExpenseListQuery(gym_id,10,offset);
+           }
+
+
 
             if(!expenseList.isEmpty()){
 
