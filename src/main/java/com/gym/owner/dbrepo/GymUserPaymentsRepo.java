@@ -20,10 +20,10 @@ public interface GymUserPaymentsRepo  extends JpaRepository<GymUserPayments, Int
     List<Map<String, Object>> getCustomerPayments(@Param("gym") int gym, @Param("gym") int customer, @Param("limit") int limit, @Param("offset") int offset);
 
     @Query(
-            value = "SELECT id, gym, customer, addedby, amount, createdon, description, status, subscription FROM gym_user_payments  where  gym=:gym and status=true order by createdon desc LIMIT :limit OFFSET :offset",
+            value = "SELECT payments.id, payments.gym, payments.customer, payments.addedby, payments.amount, payments.createdon, payments.description, payments.status, subscription,users.name FROM gym_user_payments payments,gym_users users  where users.id=payments.customer and  payments.gym=:gym and payments.status=true order by payments.createdon desc LIMIT :limit OFFSET :offset",
             nativeQuery = true
     )
-    List<Map<String, Object>> getGymPayments(@Param("gym") int customer, @Param("limit") int limit, @Param("offset") int offset);
+    List<Map<String, Object>> getGymPayments(@Param("gym") int gym, @Param("limit") int limit, @Param("offset") int offset);
 
 
 }

@@ -44,5 +44,23 @@ public class Common {
         return res;
 
     }
+    public static float  inputFloatParaNullCheck(JSONObject req,String value){
+
+
+        float res = 0;
+        try {
+            if(req.get(value) == null ){
+                res = 0;
+            }else{
+                String str_val =  req.get(value).toString();
+                res =  Float.parseFloat(str_val);
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+
+        }
+        return res;
+
+    }
 
 }

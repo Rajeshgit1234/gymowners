@@ -761,6 +761,16 @@ public class GymOwnerController {
                     JSONObject expenseItem = new JSONObject();
 
 
+                    expenseItem.put("customer",pay.get("customer"));
+                    expenseItem.put("description",pay.get("description"));
+                    expenseItem.put("subscription",pay.get("subscription"));
+                    expenseItem.put("amount",pay.get("amount"));
+                    expenseItem.put("createdon",pay.get("createdon"));
+                    expenseItem.put("id",pay.get("id"));
+                    expenseItem.put("name",pay.get("name"));
+
+
+
                     paymentsJson.put(expenseItem);
                 }
 
@@ -772,7 +782,7 @@ public class GymOwnerController {
         }catch(Exception e){ e.printStackTrace();}finally {
             res.put("status",status);
             res.put("statusDesc",statusDesc);
-            res.put("expenseList",paymentsJson );
+            res.put("payList",paymentsJson );
         }
 
         return res.toString();
@@ -793,17 +803,30 @@ public class GymOwnerController {
         try{
             System.out.println("gymOwnerService --> addExpense "+jsonReq);
             JSONObject req = new JSONObject(jsonReq);
-            String gym_id_str = req.get("gym_id").toString();
+           /* String gym_id_str = req.get("gym_id").toString();
             String customer_str = req.get("customer").toString();
             String addedby_str = req.get("addedby").toString();
             String amount_str = req.get("amount").toString();
             String description = req.get("description").toString();
             String subscription = req.get("subscription").toString();
 
-            int gym_id = Integer.valueOf(gym_id_str);
+             int gym_id = Integer.valueOf(gym_id_str);
             int customer = Integer.valueOf(customer_str);
             int addedby = Integer.valueOf(addedby_str);
             float amount = Float.valueOf(amount_str);
+            */
+
+
+            int gym_id = Common.inputIntParaNullCheck(req,"gym_id");
+            int customer = Common.inputIntParaNullCheck(req,"customer");
+            int fromMonth = Common.inputIntParaNullCheck(req,"fromMonth");
+            int toMonth = Common.inputIntParaNullCheck(req,"toMonth");
+            int addedby = Common.inputIntParaNullCheck(req,"addedby");
+            float amount = Common.inputFloatParaNullCheck(req,"amount");
+            String description = Common.inputStringParaNullCheck(req,"description");
+            String subscription = Common.inputStringParaNullCheck(req,"subscription");
+
+
 
             GymUserPayments gymUserPayments = new GymUserPayments();
             gymUserPayments.setGym(gym_id);
@@ -812,6 +835,8 @@ public class GymOwnerController {
             gymUserPayments.setAmount(amount);
             gymUserPayments.setDescription(description);
             gymUserPayments.setSubscription(subscription);
+            gymUserPayments.setFromMonth(fromMonth);
+            gymUserPayments.setToMonth(toMonth);
             gymUserPayments.setStatus(true);
 
 
