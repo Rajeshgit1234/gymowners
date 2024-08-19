@@ -768,6 +768,8 @@ public class GymOwnerController {
                     expenseItem.put("createdon",pay.get("createdon"));
                     expenseItem.put("id",pay.get("id"));
                     expenseItem.put("name",pay.get("name"));
+                    expenseItem.put("paymonth",pay.get("paymonth"));
+                    expenseItem.put("payyear",pay.get("payyear"));
 
 
 
@@ -798,6 +800,7 @@ public class GymOwnerController {
         Boolean status = false;
         String statusDesc = "Failed";
         statusDesc = "Operation failed";
+        ArrayList<Integer> payIds = new ArrayList<>();
     int paymentid=0;
             JSONObject res = new JSONObject();
         try{
@@ -821,28 +824,109 @@ public class GymOwnerController {
             int customer = Common.inputIntParaNullCheck(req,"customer");
             int fromMonth = Common.inputIntParaNullCheck(req,"fromMonth");
             int toMonth = Common.inputIntParaNullCheck(req,"toMonth");
+            int fromYear = Common.inputIntParaNullCheck(req,"fromYear");
+            int toYear = Common.inputIntParaNullCheck(req,"toYear");
             int addedby = Common.inputIntParaNullCheck(req,"addedby");
             float amount = Common.inputFloatParaNullCheck(req,"amount");
             String description = Common.inputStringParaNullCheck(req,"description");
             String subscription = Common.inputStringParaNullCheck(req,"subscription");
 
+            boolean sameyear = true;
+            boolean diffMonth = true;
+
+            if(fromYear!=toYear){
+                sameyear= false;
+            }
+            if(fromMonth==toMonth && fromYear==toYear){
+
+                diffMonth= false;
+            }
+
+            if(!diffMonth){
+
+                GymUserPayments gymUserPayments = new GymUserPayments();
+                gymUserPayments.setGym(gym_id);
+                gymUserPayments.setCustomer(customer);
+                gymUserPayments.setAddedby(addedby);
+                gymUserPayments.setAmount(amount);
+                gymUserPayments.setDescription(description);
+                gymUserPayments.setSubscription(subscription);
+                gymUserPayments.setPaymonth(fromMonth);
+                gymUserPayments.setPayyear(fromYear);
+                gymUserPayments.setStatus(true);
+                GymUserPayments newGymUserPayments = new GymUserPayments();
+                payIds.add(gymUserPaymentsService.InsertPayments(gymUserPayments).getId());
+                status = true;
+                 statusDesc = "Added successfully";
+            }else if(!sameyear){
+
+                int curr_year = fromYear;
+                int startMonth = 0;
+                for( startMonth = fromMonth;startMonth<=12;startMonth++){
+
+                    GymUserPayments gymUserPayments = new GymUserPayments();
+                    gymUserPayments.setGym(gym_id);
+                    gymUserPayments.setCustomer(customer);
+                    gymUserPayments.setAddedby(addedby);
+                    gymUserPayments.setAmount(amount);
+                    gymUserPayments.setDescription(description);
+                    gymUserPayments.setSubscription(subscription);
+                    gymUserPayments.setPaymonth(startMonth);
+                    gymUserPayments.setPayyear(curr_year);
+                    gymUserPayments.setStatus(true);
+                    GymUserPayments newGymUserPayments = new GymUserPayments();
+                    payIds.add(gymUserPaymentsService.InsertPayments(gymUserPayments).getId());
+                    status = true;
+                    statusDesc = "Added successfully";
+
+                }
+                curr_year=curr_year+1;
+
+                for(int endMonth = 1;endMonth<=toMonth;endMonth++){
+
+                    GymUserPayments gymUserPayments = new GymUserPayments();
+                    gymUserPayments.setGym(gym_id);
+                    gymUserPayments.setCustomer(customer);
+                    gymUserPayments.setAddedby(addedby);
+                    gymUserPayments.setAmount(amount);
+                    gymUserPayments.setDescription(description);
+                    gymUserPayments.setSubscription(subscription);
+                    gymUserPayments.setPaymonth(endMonth);
+                    gymUserPayments.setPayyear(curr_year);
+                    gymUserPayments.setStatus(true);
+                    GymUserPayments newGymUserPayments = new GymUserPayments();
+                    payIds.add(gymUserPaymentsService.InsertPayments(gymUserPayments).getId());
 
 
-            GymUserPayments gymUserPayments = new GymUserPayments();
-            gymUserPayments.setGym(gym_id);
-            gymUserPayments.setCustomer(customer);
-            gymUserPayments.setAddedby(addedby);
-            gymUserPayments.setAmount(amount);
-            gymUserPayments.setDescription(description);
-            gymUserPayments.setSubscription(subscription);
-            gymUserPayments.setFromMonth(fromMonth);
-            gymUserPayments.setToMonth(toMonth);
-            gymUserPayments.setStatus(true);
+                }
+
+            }else{
+
+                int startMonth = 0;
+                for(startMonth=fromMonth;startMonth<=toMonth;startMonth++){
+
+                    GymUserPayments gymUserPayments = new GymUserPayments();
+                    gymUserPayments.setGym(gym_id);
+                    gymUserPayments.setCustomer(customer);
+                    gymUserPayments.setAddedby(addedby);
+                    gymUserPayments.setAmount(amount);
+                    gymUserPayments.setDescription(description);
+                    gymUserPayments.setSubscription(subscription);
+                    gymUserPayments.setPaymonth(startMonth);
+                    gymUserPayments.setPayyear(toYear);
+                    gymUserPayments.setStatus(true);
+                    GymUserPayments newGymUserPayments = new GymUserPayments();
+                    payIds.add(gymUserPaymentsService.InsertPayments(gymUserPayments).getId());
+
+                }
+            }
+            status = true;
+            statusDesc = "Added successfully";
 
 
-           GymUserPayments newGymUserPayments = new GymUserPayments();
-            newGymUserPayments = gymUserPaymentsService.InsertPayments(gymUserPayments);
-            if(newGymUserPayments!=null){
+
+
+           /* if(newGymUserPayments!=null){
 
                 paymentid = newGymUserPayments.getId();
                 statusDesc = "Data saved";
@@ -852,14 +936,14 @@ public class GymOwnerController {
 
                 statusDesc = "Insertion failed";
                 status=false;
-            }
+            }*/
 
 
 
         }catch(Exception e){ e.printStackTrace();}finally {
             res.put("status",status);
             res.put("statusDesc",statusDesc);
-            res.put("paymentid",paymentid );
+            res.put("paymentid",payIds );
         }
 
         return res.toString();

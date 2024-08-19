@@ -16,10 +16,10 @@ public class GymUserPayments {
     private int gym;
     private int customer;
     private int addedby;
-    @Column(name = "frommonth")
-    private int fromMonth;
-    @Column(name = "tomonth")
-    private int toMonth;
+    @Column(name = "paymonth")
+    private int paymonth;
+    @Column(name = "payyear")
+    private int payyear;
     private float amount;
     @CreationTimestamp
     private Timestamp createdon;
@@ -28,13 +28,13 @@ public class GymUserPayments {
     private String subscription;
 
 
-    public GymUserPayments(int id, int gym, int customer, int addedby, int fromMonth, int toMonth, float amount, Timestamp createdon, String description, boolean status, String subscription) {
+    public GymUserPayments(int id, int gym, int customer, int addedby, int paymonth, int payyear, float amount, Timestamp createdon, String description, boolean status, String subscription) {
         this.id = id;
         this.gym = gym;
         this.customer = customer;
         this.addedby = addedby;
-        this.fromMonth = fromMonth;
-        this.toMonth = toMonth;
+        this.paymonth = paymonth;
+        this.payyear = payyear;
         this.amount = amount;
         this.createdon = createdon;
         this.description = description;
@@ -45,6 +45,7 @@ public class GymUserPayments {
     public GymUserPayments() {
 
     }
+
 
     public int getId() {
         return id;
@@ -78,20 +79,20 @@ public class GymUserPayments {
         this.addedby = addedby;
     }
 
-    public int getFromMonth() {
-        return fromMonth;
+    public int getPaymonth() {
+        return paymonth;
     }
 
-    public void setFromMonth(int fromMonth) {
-        this.fromMonth = fromMonth;
+    public void setPaymonth(int paymonth) {
+        this.paymonth = paymonth;
     }
 
-    public int getToMonth() {
-        return toMonth;
+    public int getPayyear() {
+        return payyear;
     }
 
-    public void setToMonth(int toMonth) {
-        this.toMonth = toMonth;
+    public void setPayyear(int payyear) {
+        this.payyear = payyear;
     }
 
     public float getAmount() {
