@@ -23,6 +23,14 @@ public class GymUserPaymentsService {
     public List<Map<String, Object>> getGymPayments(int gym, int offset) {
         return gymUserPaymentsRepo.getGymPayments(gym,10,offset);
     }
+    public List<Map<String, Object>> getGymPaymentsFilterMonthYear(int gym, int payyear,int paymonth,int offset) {
+        return gymUserPaymentsRepo.getGymPaymentsFilterMonthYear(gym,payyear,paymonth,10,offset);
+    }public List<Map<String, Object>> getGymPaymentsFilterYear(int gym, int payyear,int offset) {
+        return gymUserPaymentsRepo.getGymPaymentsFilterYear(gym,payyear,10,offset);
+    }
+public List<Map<String, Object>> getGymPaymentsFilterCustomerYear(int gym,int payyear,int customer, int offset) {
+        return gymUserPaymentsRepo.getGymPaymentsFilterCustomerYear(gym,payyear,customer,10,offset);
+    }
 
     public GymUserPayments InsertPayments(GymUserPayments gymUserPayments) {
         return gymUserPaymentsRepo.save(gymUserPayments);

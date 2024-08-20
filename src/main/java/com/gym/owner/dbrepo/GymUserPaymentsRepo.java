@@ -24,6 +24,21 @@ public interface GymUserPaymentsRepo  extends JpaRepository<GymUserPayments, Int
             nativeQuery = true
     )
     List<Map<String, Object>> getGymPayments(@Param("gym") int gym, @Param("limit") int limit, @Param("offset") int offset);
+    @Query(
+            value = "SELECT payments.id, payments.gym, payments.customer, payments.addedby, payments.amount, payments.createdon, payments.description, payments.status,payments.paymonth,payments.payyear, subscription,users.name FROM gym_user_payments payments,gym_users users  where users.id=payments.customer and  payments.gym=:gym and payments.status=true and payments.paymonth=:paymonth and payments.payyear=:payyear  order by payments.paymonth,payments.id desc LIMIT :limit OFFSET :offset",
+            nativeQuery = true
+    )
+    List<Map<String, Object>> getGymPaymentsFilterMonthYear(@Param("gym") int gym, @Param("payyear") int payyear,@Param("paymonth") int paymonth,@Param("limit") int limit, @Param("offset") int offset);
+    @Query(
+            value = "SELECT payments.id, payments.gym, payments.customer, payments.addedby, payments.amount, payments.createdon, payments.description, payments.status,payments.paymonth,payments.payyear, subscription,users.name FROM gym_user_payments payments,gym_users users  where users.id=payments.customer and  payments.gym=:gym and payments.status=true and payments.payyear=:payyear  order by payments.paymonth,payments.id desc LIMIT :limit OFFSET :offset",
+            nativeQuery = true
+    )
+    List<Map<String, Object>> getGymPaymentsFilterYear(@Param("gym") int gym,@Param("payyear") int payyear, @Param("limit") int limit, @Param("offset") int offset);
+    @Query(
+            value = "SELECT payments.id, payments.gym, payments.customer, payments.addedby, payments.amount, payments.createdon, payments.description, payments.status,payments.paymonth,payments.payyear, subscription,users.name FROM gym_user_payments payments,gym_users users  where users.id=payments.customer and  payments.gym=:gym and payments.status=true and payments.payyear=:payyear and payments.customer=:customer order by payments.paymonth,payments.id desc LIMIT :limit OFFSET :offset",
+            nativeQuery = true
+    )
+    List<Map<String, Object>> getGymPaymentsFilterCustomerYear(@Param("gym") int gym,@Param("payyear") int payyear, @Param("customer") int customer, @Param("limit") int limit, @Param("offset") int offset);
 
 
 }

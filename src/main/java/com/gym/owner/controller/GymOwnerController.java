@@ -792,6 +792,84 @@ public class GymOwnerController {
 
 
     }
+    @CrossOrigin
+    @PostMapping("/loadCustomerPaymentsFilter")
+
+    public String loadCustomerPaymentsFilter(@RequestBody String jsonReq) {
+
+        Boolean status = false;
+        String statusDesc = "Failed";
+        statusDesc = "Operation failed";
+
+        JSONArray paymentsJson =new JSONArray();
+        DecimalFormat formatter
+                = new DecimalFormat("₹#,##0.00");
+        JSONObject res = new JSONObject();
+        try{
+            System.out.println("gymOwnerService --> addExpense "+jsonReq);
+            JSONObject req = new JSONObject(jsonReq);
+            int gym_id = Common.inputIntParaNullCheck(req,"gym_id");
+            /*String offset_str = req.get("offset").toString();
+            String offset_str = req.get("offset").toString();
+            String offset_str = req.get("offset").toString();
+            int gym_id = Integer.valueOf(gym_id_str);
+            int offset = Integer.valueOf(offset_str);*/
+            int offset = Common.inputIntParaNullCheck(req,"offset");
+            int month = Common.inputIntParaNullCheck(req,"month");
+            int year = Common.inputIntParaNullCheck(req,"year");
+            int customer = Common.inputIntParaNullCheck(req,"customer");
+
+            if(gym_id!=0 && year!=0) {
+
+                List<Map<String, Object>> paymentsList = new ArrayList<>();
+                if(customer!=0 ){
+                    paymentsList = gymUserPaymentsService.getGymPaymentsFilterCustomerYear(gym_id,year,customer,offset);
+
+                }else if(month!=0){
+                    paymentsList = gymUserPaymentsService.getGymPaymentsFilterMonthYear(gym_id,year,month,offset);
+                }else {
+                    paymentsList = gymUserPaymentsService.getGymPayments(gym_id, offset);
+                }
+                if (!paymentsList.isEmpty()) {
+
+                    for (Map<String, Object> pay : paymentsList) {
+                        JSONObject expenseItem = new JSONObject();
+
+
+                        expenseItem.put("customer", pay.get("customer"));
+                        expenseItem.put("description", pay.get("description"));
+                        expenseItem.put("subscription", pay.get("subscription"));
+                        expenseItem.put("amount", pay.get("amount"));
+                        expenseItem.put("createdon", pay.get("createdon"));
+                        expenseItem.put("id", pay.get("id"));
+                        expenseItem.put("name", pay.get("name"));
+                        expenseItem.put("paymonth", pay.get("paymonth"));
+                        expenseItem.put("payyear", pay.get("payyear"));
+
+
+                        paymentsJson.put(expenseItem);
+                    }
+
+                }
+                statusDesc = "Data fetched";
+                status = true;
+            }else{
+
+                statusDesc = "Mandatory fields missing";
+            }
+
+
+        }catch(Exception e){ e.printStackTrace();}finally {
+            res.put("status",status);
+            res.put("statusDesc",statusDesc);
+            res.put("payList",paymentsJson );
+        }
+
+        return res.toString();
+
+
+
+    }
 @CrossOrigin
     @PostMapping("/markCustomerPayments")
 
