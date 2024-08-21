@@ -273,6 +273,65 @@ public class GymOwnerController {
     }
 
     @CrossOrigin
+    @PostMapping("/EditExpense")
+    public String EditExpense(@RequestBody String jsonReq) {
+
+        Boolean status = false;
+        String statusDesc = "Failed";
+        JSONArray expenseJson =new JSONArray();
+        DecimalFormat formatter
+                = new DecimalFormat("₹#,##0.00");
+        JSONObject res = new JSONObject();
+
+        try{
+            System.out.println("gymOwnerService --> addExpense "+jsonReq);
+            JSONObject req = new JSONObject(jsonReq);
+
+            /*String gym_id_str = req.get("gym_id").toString();
+            String user_id_str = req.get("user_id").toString();
+            String expDate = req.get("expDate").toString();
+            String exp_id_str = req.get("exp_id").toString();
+            String exp_remarks = req.get("exp_remarks").toString();
+            String exp_amount_str = req.get("amount").toString();
+            int gym_id = Integer.valueOf(gym_id_str);
+            int exp_id = Integer.valueOf(exp_id_str);
+            int user_id = Integer.valueOf(user_id_str);
+            float exp_amount = Float.valueOf(exp_amount_str);*/
+
+            int id = Common.inputIntParaNullCheck(req,"id");
+            int exp_id = Common.inputIntParaNullCheck(req,"exp_id");
+            String expDate = Common.inputStringParaNullCheck(req,"expDate");
+            String exp_remarks = Common.inputStringParaNullCheck(req,"exp_remarks");
+            float amount = Common.inputFloatParaNullCheck(req,"amount");
+
+
+           int count = gymExpenseListService.editExpenses(id,exp_id,new Timestamp(DATE_TIME_FORMAT.parse(expDate).getTime()),exp_remarks,amount);
+
+
+
+             if(count!=0){
+                statusDesc = "Expenses edited successfully";
+                status = true;
+            }else{
+
+                statusDesc = "Operation failed";
+            }
+
+
+
+
+        }catch(Exception e){ e.printStackTrace();}finally {
+            res.put("status",status);
+            res.put("statusDesc",statusDesc);
+            res.put("expenseList",expenseJson );
+        }
+        return res.toString();
+
+
+
+    }
+
+    @CrossOrigin
     @PostMapping("/addNewGymUser")
     public String addNewGymUser(@RequestBody String jsonReq) {
 

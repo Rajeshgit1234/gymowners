@@ -45,6 +45,14 @@ public class GymExpenseListService {
 
         return  gymExpenseListRepo.save(gymExpenseList);
     }
+    public Integer editExpenses(int id,int expid,Timestamp exp_date,String exp_remarks,float amount) {
+
+        return  gymExpenseListRepo.editExp(id,expid,exp_date,exp_remarks,amount);
+    }
+    public void deleteExpenses(GymExpenseList gymExpenseList) {
+
+          gymExpenseListRepo.delete(gymExpenseList);
+    }
     public List<Map<String, Object>>  getExpenseSumMonth(int gym_id, Timestamp str_date) {
 
         return  gymExpenseListRepo.getExpenseSumMonth(gym_id,str_date);
