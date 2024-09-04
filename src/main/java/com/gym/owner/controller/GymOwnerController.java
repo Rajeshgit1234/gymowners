@@ -284,7 +284,7 @@ public class GymOwnerController {
         JSONObject res = new JSONObject();
 
         try{
-            System.out.println("gymOwnerService --> addExpense "+jsonReq);
+            System.out.println("gymOwnerService --> EditExpense "+jsonReq);
             JSONObject req = new JSONObject(jsonReq);
 
             /*String gym_id_str = req.get("gym_id").toString();
@@ -324,6 +324,56 @@ public class GymOwnerController {
             res.put("status",status);
             res.put("statusDesc",statusDesc);
             res.put("expenseList",expenseJson );
+        }
+        return res.toString();
+
+
+
+    }
+
+    @CrossOrigin
+    @PostMapping("/delExpense")
+    public String delExpense(@RequestBody String jsonReq) {
+
+        Boolean status = false;
+        String statusDesc = "Failed";
+        int count =0;
+
+        JSONObject res = new JSONObject();
+
+        try{
+            System.out.println("gymOwnerService --> addExpense "+jsonReq);
+            JSONObject req = new JSONObject(jsonReq);
+
+
+
+            int exp_id = Common.inputIntParaNullCheck(req,"exp_id");
+
+
+
+             count = gymExpenseListService.deleteExpenses(exp_id);
+
+
+
+            if(count!=0){
+                statusDesc = "Expenses edited successfully";
+                status = true;
+            }else{
+
+                statusDesc = "Operation failed";
+            }
+
+
+
+
+
+
+
+
+        }catch(Exception e){ e.printStackTrace();}finally {
+            res.put("status",status);
+            res.put("statusDesc",statusDesc);
+            res.put("count",count );
         }
         return res.toString();
 

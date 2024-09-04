@@ -33,4 +33,5 @@ public interface GymExpenseListRepo extends JpaRepository<GymExpenseList, Intege
     )
     Integer  editExp(@Param("id") int id, @Param("expid") int expid, @Param("exp_date") Timestamp exp_date,@Param("exp_remarks") String exp_remarks, @Param("amount") float amount);
 
+
 }

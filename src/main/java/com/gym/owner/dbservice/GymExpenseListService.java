@@ -1,8 +1,6 @@
 package com.gym.owner.dbservice;
 
-import com.gym.owner.DB.ExpenseMaster;
 import com.gym.owner.DB.GymExpenseList;
-import com.gym.owner.DB.GymExpenseListQuery;
 import com.gym.owner.dbrepo.GymExpenseListQueryRepo;
 import com.gym.owner.dbrepo.GymExpenseListRepo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +9,7 @@ import org.springframework.stereotype.Service;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 public class GymExpenseListService {
@@ -24,6 +23,10 @@ public class GymExpenseListService {
     public List<GymExpenseList> getGymExpenseList(int gym_id) {
 
        return gymExpenseListRepo.getExpenseList(gym_id);
+    }
+    public Optional<GymExpenseList> getExpenseId(int exp) {
+
+       return gymExpenseListRepo.findById(exp);
     }
 
     public List<Map<String, Object>> getGymExpenseListQuery(int gym_id,int limit,int offset) {
@@ -48,10 +51,11 @@ public class GymExpenseListService {
     public Integer editExpenses(int id,int expid,Timestamp exp_date,String exp_remarks,float amount) {
 
         return  gymExpenseListRepo.editExp(id,expid,exp_date,exp_remarks,amount);
-    }
-    public void deleteExpenses(GymExpenseList gymExpenseList) {
 
-          gymExpenseListRepo.delete(gymExpenseList);
+    }
+    public Integer deleteExpenses(int id) {
+
+         return  gymExpenseListQueryRepo.delExp(id);
     }
     public List<Map<String, Object>>  getExpenseSumMonth(int gym_id, Timestamp str_date) {
 

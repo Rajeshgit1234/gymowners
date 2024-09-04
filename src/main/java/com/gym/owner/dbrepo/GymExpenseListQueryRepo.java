@@ -2,6 +2,7 @@ package com.gym.owner.dbrepo;
 
 import com.gym.owner.DB.GymExpenseList;
 import com.gym.owner.DB.GymExpenseListQuery;
+import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -42,6 +43,14 @@ public interface GymExpenseListQueryRepo extends JpaRepository<GymExpenseListQue
             nativeQuery = true
     )
     List<Map<String, Object>>  getGymExpenseListQueryFilterDate(@Param("gym") int gym, @Param("str_date") Timestamp str_date,@Param("end_date") Timestamp end_date, @Param("limit") int limit, @Param("offset") int offset);
+
+    @Modifying(clearAutomatically = true)
+    @Transactional
+    @Query(
+            value = "delete from gym_expense_list where id =:id ",
+            nativeQuery = true
+    )
+    Integer  delExp( @Param("id") int id);
 
 
 
