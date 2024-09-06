@@ -47,10 +47,10 @@ public interface GymExpenseListQueryRepo extends JpaRepository<GymExpenseListQue
     @Modifying(clearAutomatically = true)
     @Transactional
     @Query(
-            value = "delete from gym_expense_list where id =:id ",
+            value = "update gym_expense_list set updated_by=:updatedby,updated_on=current_timestamp, status=false where id =:id ",
             nativeQuery = true
     )
-    Integer  delExp( @Param("id") int id);
+    Integer  delExp( @Param("id") int id,@Param("updatedby") int updatedby);
 
 
 

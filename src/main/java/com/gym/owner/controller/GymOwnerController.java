@@ -348,21 +348,79 @@ public class GymOwnerController {
 
 
             int exp_id = Common.inputIntParaNullCheck(req,"exp_id");
+            int updatedby = Common.inputIntParaNullCheck(req,"updatedby");
 
 
+            if(updatedby!=0) {
+                count = gymExpenseListService.deleteExpenses(exp_id, updatedby);
 
-             count = gymExpenseListService.deleteExpenses(exp_id);
 
+                if (count != 0) {
+                    statusDesc = "Expenses deleted successfully";
+                    status = true;
+                } else {
 
-
-            if(count!=0){
-                statusDesc = "Expenses edited successfully";
-                status = true;
+                    statusDesc = "Operation failed";
+                }
             }else{
+
+                statusDesc = "Wrong user";
+            }
+
+
+
+
+
+
+
+
+        }catch(Exception e){ e.printStackTrace();}finally {
+            res.put("status",status);
+            res.put("statusDesc",statusDesc);
+            res.put("count",count );
+        }
+        return res.toString();
+
+
+
+    }
+
+
+
+    @CrossOrigin
+    @PostMapping("/delPay")
+    public String delPay(@RequestBody String jsonReq) {
+
+        Boolean status = false;
+        String statusDesc = "Failed";
+        int count =0;
+
+        JSONObject res = new JSONObject();
+
+        try{
+            System.out.println("gymOwnerService --> addExpense "+jsonReq);
+            JSONObject req = new JSONObject(jsonReq);
+
+
+
+            int pay_id = Common.inputIntParaNullCheck(req,"pay_id");
+            int userid = Common.inputIntParaNullCheck(req,"userid");
+
+
+        if(userid!=0) {
+            count = gymUserPaymentsService.deletePayment(pay_id, userid);
+
+
+            if (count != 0) {
+                statusDesc = "Payment data deleted successfully";
+                status = true;
+            } else {
 
                 statusDesc = "Operation failed";
             }
-
+        }else{
+            statusDesc = "Wrong user";
+        }
 
 
 
@@ -446,10 +504,10 @@ public class GymOwnerController {
 
     }
     @CrossOrigin
-    @PostMapping("/addNewUserProfile")
+    @PostMapping("/addNewUserProfileByAdmin")
     public String addNewUserProfile(@RequestBody String jsonReq) {
 
-        Boolean status = false;
+        /*Boolean status = false;
         String statusDesc = "Failed";
         int profile_id = 0;
         JSONObject res = new JSONObject();
@@ -476,6 +534,54 @@ public class GymOwnerController {
 
                 statusDesc = "Operation failed";
             }
+
+
+
+        }catch(Exception e){ e.printStackTrace();}finally {
+            res.put("status",status);
+            res.put("statusDesc",statusDesc);
+            res.put("profile_id",profile_id );
+        }
+        return res.toString();
+
+         */
+
+        Boolean status = false;
+        String statusDesc = "Failed";
+        int profile_id = 0;
+        JSONObject res = new JSONObject();
+
+        try {
+            System.out.println("gymOwnerService --> addNewGym " + jsonReq);
+            JSONObject req = new JSONObject(jsonReq);
+            String profile_name = req.get("profile_name").toString();
+            int gym_id = 0;
+            profile_name = profile_name.toUpperCase();
+            List<Map<String, Object>> extProfile = gymProfilesService.checkProfileExist(profile_name,gym_id);
+            if(extProfile.isEmpty()) {
+                GymProfiles profile = new GymProfiles();
+                profile.setStatus(true);
+                profile.setProfile_name(profile_name);
+                profile.setGym_id(gym_id);
+                GymProfiles respProfile =gymProfilesService.saveNewProfile(profile);
+                if(respProfile != null){
+                    System.out.println("gymExpenseListService :: " + respProfile.getId());
+                    statusDesc = "Profile added successfully";
+                    status=true;
+                    profile_id = respProfile.getId();
+                }else{
+
+                    statusDesc = "Operation failed";
+                }
+
+
+            }else {
+
+                statusDesc = "Same profile already exists";
+
+            }
+
+
 
 
 
@@ -558,8 +664,8 @@ public class GymOwnerController {
             int user_id = Integer.valueOf(added_id_str);
             int gym_id = Integer.valueOf(gym_id_str);
 
-            GymProfiles extProfile = gymProfilesService.checkProfileExist(profile_name,gym_id);
-            if(extProfile==null) {
+            List<Map<String, Object>> extProfile = gymProfilesService.checkProfileExist(profile_name,gym_id);
+            if(extProfile.isEmpty()) {
                 GymProfiles profile = new GymProfiles();
                 profile.setStatus(true);
                 profile.setProfile_name(profile_name);
@@ -809,9 +915,62 @@ public class GymOwnerController {
         try{
             System.out.println("gymOwnerService --> loadProfile "+jsonReq);
             JSONObject req = new JSONObject(jsonReq);
-            String gym_id_str = req.get("gym_id").toString();
-            int gym_id = Integer.valueOf(gym_id_str);
-            Optional<GymUsers> gymUsersList = gymUsersService.findCustomers(gym_id);
+            /*String gym_id_str = req.get("gym_id").toString();
+            int gym_id = Integer.valueOf(gym_id_str);*/
+            int gym_id = Common.inputIntParaNullCheck(req,"gym_id");
+
+            Optional<GymUsers> gymUsersList = gymUsersService.findCustomers(gym_id,Common.GYM_CUSTOMERS);
+            if(!gymUsersList.isEmpty()){
+
+
+                if(gymUsersList.get()!=null){
+                    JSONObject profileEnt = new JSONObject();
+                    profileEnt.put("username",gymUsersList.get().getUsername());
+                    profileEnt.put("name",gymUsersList.get().getName());
+                    profileEnt.put("phone",gymUsersList.get().getPhone());
+                    profileEnt.put("id",gymUsersList.get().getId());
+                    profile.put(profileEnt);
+
+                }
+
+            }
+            statusDesc = "Data fetched";
+            status=true;
+
+
+        }catch(Exception e){ e.printStackTrace();}finally {
+            res.put("status",status);
+            res.put("statusDesc",statusDesc);
+            res.put("profile",profile );
+        }
+
+        return res.toString();
+
+
+
+    }
+
+    @CrossOrigin
+    @PostMapping("/loadGymMembers")
+
+    public String loadGymMemebers(@RequestBody String jsonReq) {
+
+        Boolean status = false;
+        String statusDesc = "Failed";
+
+
+        JSONArray profile =new JSONArray();
+
+        JSONObject res = new JSONObject();
+        try{
+            System.out.println("gymOwnerService --> loadProfile "+jsonReq);
+            JSONObject req = new JSONObject(jsonReq);
+            /*String gym_id_str = req.get("gym_id").toString();
+            int gym_id = Integer.valueOf(gym_id_str);*/
+            int gym_id = Common.inputIntParaNullCheck(req,"gym_id");
+            int profile_id = Common.inputIntParaNullCheck(req,"profile");
+
+            Optional<GymUsers> gymUsersList = gymUsersService.findCustomers(gym_id,profile_id);
             if(!gymUsersList.isEmpty()){
 
 
@@ -858,10 +1017,13 @@ public class GymOwnerController {
         try{
             System.out.println("gymOwnerService --> addExpense "+jsonReq);
             JSONObject req = new JSONObject(jsonReq);
-            String gym_id_str = req.get("gym_id").toString();
+            /*String gym_id_str = req.get("gym_id").toString();
             String offset_str = req.get("offset").toString();
             int gym_id = Integer.valueOf(gym_id_str);
-            int offset = Integer.valueOf(offset_str);
+            int offset = Integer.valueOf(offset_str);*/
+            int gym_id = Common.inputIntParaNullCheck(req,"gym_id");
+            int offset = Common.inputIntParaNullCheck(req,"offset");
+
             List<Map<String, Object>> paymentsList= gymUserPaymentsService.getGymPayments(gym_id,offset);
 
             if(!paymentsList.isEmpty()){

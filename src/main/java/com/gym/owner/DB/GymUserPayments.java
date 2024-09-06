@@ -2,6 +2,7 @@ package com.gym.owner.DB;
 
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.sql.Time;
 import java.sql.Timestamp;
@@ -16,6 +17,8 @@ public class GymUserPayments {
     private int gym;
     private int customer;
     private int addedby;
+    @Column(name = "updatedby")
+    private int updatedby;
     @Column(name = "paymonth")
     private int paymonth;
     @Column(name = "payyear")
@@ -23,20 +26,23 @@ public class GymUserPayments {
     private float amount;
     @CreationTimestamp
     private Timestamp createdon;
+    @UpdateTimestamp
+    private Timestamp updatedon;
     private String description;
     private boolean status;
     private String subscription;
 
-
-    public GymUserPayments(int id, int gym, int customer, int addedby, int paymonth, int payyear, float amount, Timestamp createdon, String description, boolean status, String subscription) {
+    public GymUserPayments(int id, int gym, int customer, int addedby, int updatedby, int paymonth, int payyear, float amount, Timestamp createdon, Timestamp updatedon, String description, boolean status, String subscription) {
         this.id = id;
         this.gym = gym;
         this.customer = customer;
         this.addedby = addedby;
+        this.updatedby = updatedby;
         this.paymonth = paymonth;
         this.payyear = payyear;
         this.amount = amount;
         this.createdon = createdon;
+        this.updatedon = updatedon;
         this.description = description;
         this.status = status;
         this.subscription = subscription;
@@ -45,7 +51,6 @@ public class GymUserPayments {
     public GymUserPayments() {
 
     }
-
 
     public int getId() {
         return id;
@@ -79,6 +84,14 @@ public class GymUserPayments {
         this.addedby = addedby;
     }
 
+    public int getUpdatedby() {
+        return updatedby;
+    }
+
+    public void setUpdatedby(int updatedby) {
+        this.updatedby = updatedby;
+    }
+
     public int getPaymonth() {
         return paymonth;
     }
@@ -109,6 +122,14 @@ public class GymUserPayments {
 
     public void setCreatedon(Timestamp createdon) {
         this.createdon = createdon;
+    }
+
+    public Timestamp getUpdatedon() {
+        return updatedon;
+    }
+
+    public void setUpdatedon(Timestamp updatedon) {
+        this.updatedon = updatedon;
     }
 
     public String getDescription() {

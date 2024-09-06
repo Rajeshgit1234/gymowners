@@ -4,6 +4,10 @@ import org.json.JSONObject;
 
 public class Common {
 
+    public static final int GYM_CUSTOMERS= 253;//based on profile table id
+    public static final int GYM_OWNERS= 252;
+
+
     public static String  checkNull(String value){
         if(value == null ){
             return "";

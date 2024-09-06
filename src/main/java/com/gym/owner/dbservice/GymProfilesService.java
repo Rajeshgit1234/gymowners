@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -27,7 +28,7 @@ public class GymProfilesService {
 
         return  gymProfilesRepo.findById(gymId);
     }
-    public GymProfiles checkProfileExist(String profile_name,Integer gymId){
+    public List<Map<String, Object>> checkProfileExist(String profile_name, Integer gymId){
 
         return  gymProfilesRepo.findGymProfilesByName(profile_name,1);
     }

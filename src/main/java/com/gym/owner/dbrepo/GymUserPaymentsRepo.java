@@ -1,10 +1,13 @@
 package com.gym.owner.dbrepo;
 
 import com.gym.owner.DB.GymUserPayments;
+import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -39,6 +42,16 @@ public interface GymUserPaymentsRepo  extends JpaRepository<GymUserPayments, Int
             nativeQuery = true
     )
     List<Map<String, Object>> getGymPaymentsFilterCustomerYear(@Param("gym") int gym,@Param("payyear") int payyear, @Param("customer") int customer, @Param("limit") int limit, @Param("offset") int offset);
+
+
+
+    @Modifying(clearAutomatically = true)
+    @Transactional
+    @Query(
+            value = "update gym_user_payments set updatedby=:updatedby,updatedon=current_timestamp, status=false where id =:id ",
+            nativeQuery = true
+    )
+    Integer  delPay( @Param("id") int id,@Param("updatedby") int updatedby);
 
 
 }

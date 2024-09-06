@@ -36,5 +36,11 @@ public List<Map<String, Object>> getGymPaymentsFilterCustomerYear(int gym,int pa
         return gymUserPaymentsRepo.save(gymUserPayments);
     }
 
+    public Integer deletePayment(int pay_id,int userid) {
+        return gymUserPaymentsRepo.delPay(pay_id,userid);
+    }
+
+
+
 
 }

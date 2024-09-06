@@ -1,6 +1,7 @@
 package com.gym.owner.dbservice;
 
 import com.gym.owner.DB.GymUsers;
+import com.gym.owner.controller.Common;
 import com.gym.owner.dbrepo.GymUsersRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,9 +23,9 @@ public class GymUsersService {
 
         return  gymUsersRepo.findById(user_id);
     }
-    public Optional<GymUsers> findCustomers(int gym_id){
+    public Optional<GymUsers> findCustomers(int gym_id,int profile_id){
 
-        return gymUsersRepo.findByActiveAndProfileAndGym(true,253,gym_id);
+        return gymUsersRepo.findByActiveAndProfileAndGym(true, profile_id,gym_id);
     }
 
     public GymUsers loginService(String username, String password){
