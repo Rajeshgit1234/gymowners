@@ -963,6 +963,7 @@ public class GymOwnerController {
 
         JSONObject res = new JSONObject();
         try{
+
             System.out.println("gymOwnerService --> loadProfile "+jsonReq);
             JSONObject req = new JSONObject(jsonReq);
             /*String gym_id_str = req.get("gym_id").toString();
