@@ -38,7 +38,7 @@ public class GymOwnerController {
     private GymUserPaymentsService   gymUserPaymentsService;
 
     @CrossOrigin
-    @PostMapping("/login")
+    @PostMapping("/weblogin")
     public String login(@RequestBody String jsonReq) {
 
         Boolean status = false;
@@ -53,44 +53,56 @@ public class GymOwnerController {
             System.out.println("gymOwnerService --> jsonReq "+jsonReq);
             JSONObject req = new JSONObject(jsonReq);
 
-            System.out.println("gymOwnerService --> username "+req.get("username")+" password "+req.get("password"));
-            GymUsers gymUsers = gymUsersService.loginService(req.get("username").toString(),req.get("password").toString());
-            if(gymUsers !=null){
+            String phone = Common.inputStringParaNullCheck(req,"phone");
+            String password = Common.inputStringParaNullCheck(req,"password");
 
-                System.out.println("gymOwnerService :: "+ gymUsers.getGym());
-                gym_id = gymUsers.getGym();
-                user_id = gymUsers.getId();
+            if(phone.length()!=0 && password.length()!=0) {
 
-               /* gymownerJson.put("userid", gymOwner.getUser_id());
+                if(phone.substring(0,2).equals("91")){
 
-                gymownerJson.put("gymid", gymOwner.getGym_id());
-                gymownerJson.put("address", gymOwner.getAdress());
-                gymownerJson.put("name", gymOwner.getName());
+                    phone = phone.substring(2,phone.length());
+                }
+                GymUsers gymUsers = gymUsersService.loginService(phone, password);
+                if (gymUsers != null) {
 
-                List<ExpenseMaster> expenseMaster= expenseMasterService.findActiveExpenseMaster(gym_id);
-               // List<GymExpenseListQuery> expenseList= gymExpenseListService.getGymExpenseListQuery(gym_id);
+                    System.out.println("gymOwnerService :: " + gymUsers.getGym());
+                    gym_id = gymUsers.getGym();
+                    user_id = gymUsers.getId();
 
-                if(!expenseMaster.isEmpty()){
+                   /* gymownerJson.put("userid", gymOwner.getUser_id());
 
-                   for(ExpenseMaster expense:expenseMaster){
-                        JSONObject expenseJson = new JSONObject();
-                       expenseJson.put("expId",expense.getId());
-                       expenseJson.put("expItem",expense.getExpense_item());
-                       expenseMasterList.put(expenseJson);
-                   }
+                    gymownerJson.put("gymid", gymOwner.getGym_id());
+                    gymownerJson.put("address", gymOwner.getAdress());
+                    gymownerJson.put("name", gymOwner.getName());
+
+                    List<ExpenseMaster> expenseMaster= expenseMasterService.findActiveExpenseMaster(gym_id);
+                   // List<GymExpenseListQuery> expenseList= gymExpenseListService.getGymExpenseListQuery(gym_id);
+
+                    if(!expenseMaster.isEmpty()){
+
+                       for(ExpenseMaster expense:expenseMaster){
+                            JSONObject expenseJson = new JSONObject();
+                           expenseJson.put("expId",expense.getId());
+                           expenseJson.put("expItem",expense.getExpense_item());
+                           expenseMasterList.put(expenseJson);
+                       }
+
+                    }
+
+    */
+
+
+                    statusDesc = "Login success";
+                    status = true;
+                } else {
+
+                    System.out.println("login failed :: ");
+                    statusDesc = "Login failed";
 
                 }
-
-*/
-
-
-                statusDesc = "Login success";
-                status=true;
             }else{
 
-                System.out.println("login failed :: ");
                 statusDesc = "Login failed";
-
             }
 
         }catch(Exception e){ e.printStackTrace();}finally {
@@ -480,10 +492,13 @@ public class GymOwnerController {
             String username = Common.inputStringParaNullCheck(req,"username");
             String password = Common.inputStringParaNullCheck(req,"password");
             String address = Common.inputStringParaNullCheck(req,"address");
-            String ph = Common.inputStringParaNullCheck(req,"ph");
+            String phone = Common.inputStringParaNullCheck(req,"phone");
             String email = Common.inputStringParaNullCheck(req,"email");
 
+            if(phone.substring(0,2).equals("91")){
 
+                phone = phone.substring(2,phone.length());
+            }
             GymUsers gymUsers = new GymUsers();
             gymUsers.setGym(gym_id);
             gymUsers.setName(name);
@@ -492,7 +507,7 @@ public class GymOwnerController {
             gymUsers.setAddress(address);
             gymUsers.setProfile(profile_id);
             gymUsers.setActive(true);
-            gymUsers.setPhone(ph);
+            gymUsers.setPhone(phone);
             gymUsers.setEmail(email);
             gymUsers.setAddedby(user);
             gymUsers.setUpdatedby(0);
@@ -527,7 +542,7 @@ public class GymOwnerController {
 
     }
     @CrossOrigin
-    @PostMapping("/usernameAvailabilityCheck")
+    @PostMapping("/phonenoAvailabilityCheck")
     public String usernameAvailabilityCheck(@RequestBody String jsonReq) {
 
         Boolean status = false;
@@ -545,13 +560,13 @@ public class GymOwnerController {
            // String email = req.get("email").toString();
 
 
-            String username = Common.inputStringParaNullCheck(req,"username");
+            String phone = Common.inputStringParaNullCheck(req,"phone");
 
 
 
             GymUsers gymUsers = new GymUsers();
 
-            gymUsers.setUsername(username);
+            gymUsers.setPhone(phone);
 
             gymUsers.setActive(true);
 
@@ -560,7 +575,7 @@ public class GymOwnerController {
             if (owner == null){
 
 
-                    statusDesc = "User name is available";
+                    statusDesc = "User not  available";
                     status = true;
             }else{
 
@@ -1068,6 +1083,7 @@ public class GymOwnerController {
                     profileEnt.put("id",gymUsers.get("id"));
                     profileEnt.put("addedby",gymUsers.get("added"));
                     profileEnt.put("addedOn",gymUsers.get("created"));
+                    profileEnt.put("address",gymUsers.get("address"));
 
                    /* profileEnt.put("username",gymUsersList.get().getUsername());
                     profileEnt.put("name",gymUsersList.get().getName());

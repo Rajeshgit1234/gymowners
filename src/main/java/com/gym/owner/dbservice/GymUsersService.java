@@ -29,9 +29,9 @@ public class GymUsersService {
         return gymUsersRepo.findByActiveAndProfileAndGym( profile_id,gym_id);
     }
 
-    public GymUsers loginService(String username, String password){
+    public GymUsers loginService(String phone, String password){
 
-        return  gymUsersRepo.loginGymUsers(username,password);
+        return  gymUsersRepo.loginGymUsers(phone,password);
     }
     public GymUsers saveUser(GymUsers gymUsers) {
 
@@ -39,7 +39,7 @@ public class GymUsersService {
     }
     public GymUsers findUserExist(GymUsers gymUsers) {
 
-        return  gymUsersRepo.findByUsernameAndActive(gymUsers.getUsername(), gymUsers.getActive());
+        return  gymUsersRepo.findByPhoneAndActive(gymUsers.getPhone(), gymUsers.getActive());
     }
 
 }
