@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public interface GymUsersRepo extends JpaRepository<GymUsers, Integer> {
@@ -14,6 +15,8 @@ public interface GymUsersRepo extends JpaRepository<GymUsers, Integer> {
     public GymUsers loginGymUsers(@Param("username") String username, @Param("password") String password);
 
     public GymUsers findByUsernameAndActive(String username, boolean active);
-    public Optional<GymUsers> findByActiveAndProfileAndGym(boolean active, int profile,int gym);
+
+    @Query("SELECT u.id as id,u.name as name,u.username as username,u.phone as phone,u.created as created,users.name as added FROM GymUsers  u,GymUsers  users WHERE u.gym = :gym and u.profile = :profile and u.active=true and u.addedby=users.id ")
+    public List<Map<String, Object>>  findByActiveAndProfileAndGym( @Param("profile")int profile, @Param("gym")int gym);
 
 }

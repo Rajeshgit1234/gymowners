@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -23,9 +24,9 @@ public class GymUsersService {
 
         return  gymUsersRepo.findById(user_id);
     }
-    public Optional<GymUsers> findCustomers(int gym_id,int profile_id){
+    public List<Map<String, Object>> findCustomers(int gym_id, int profile_id){
 
-        return gymUsersRepo.findByActiveAndProfileAndGym(true, profile_id,gym_id);
+        return gymUsersRepo.findByActiveAndProfileAndGym( profile_id,gym_id);
     }
 
     public GymUsers loginService(String username, String password){

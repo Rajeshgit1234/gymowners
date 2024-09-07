@@ -33,10 +33,12 @@ public class GymUsers {
 
     private Boolean active;
     private int profile;
+    private int addedby;
+    private int updatedby;
     private String phone;
     private String email;
 
-    public GymUsers(int id, int gym, String name, String username, String password, String address, Timestamp created, Timestamp updated, Boolean active, int profile, String phone, String email) {
+    public GymUsers(int id, int gym, String name, String username, String password, String address, Timestamp created, Timestamp updated, Boolean active, int profile, int addedby, int updatedby, String phone, String email) {
         this.id = id;
         this.gym = gym;
         this.name = name;
@@ -47,6 +49,8 @@ public class GymUsers {
         this.updated = updated;
         this.active = active;
         this.profile = profile;
+        this.addedby = addedby;
+        this.updatedby = updatedby;
         this.phone = phone;
         this.email = email;
     }
@@ -133,6 +137,22 @@ public class GymUsers {
 
     public void setProfile(int profile) {
         this.profile = profile;
+    }
+
+    public int getAddedby() {
+        return addedby;
+    }
+
+    public void setAddedby(int addedby) {
+        this.addedby = addedby;
+    }
+
+    public int getUpdatedby() {
+        return updatedby;
+    }
+
+    public void setUpdatedby(int updatedby) {
+        this.updatedby = updatedby;
     }
 
     public String getPhone() {

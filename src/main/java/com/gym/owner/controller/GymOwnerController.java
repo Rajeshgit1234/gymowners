@@ -111,6 +111,7 @@ public class GymOwnerController {
         String statusDesc = "Failed";
         JSONObject gymuser_Json = new JSONObject();
         JSONArray expenseMasterList =new JSONArray();
+        JSONArray profileMasterList =new JSONArray();
 
         int gym_id =0;
         int user_id =0;
@@ -134,6 +135,7 @@ public class GymOwnerController {
             List<Map<String, Object>> expenseList= gymExpenseListService.getExpenseSumMonth(gym_id,new Timestamp(DATE_TIME_FORMAT.parse(todaydate.withDayOfMonth(1).toString()).getTime()));
             System.out.println("Months first date in yyyy-mm-dd: " +todaydate.withDayOfMonth(1));
 
+           List<GymProfiles> gymProfiles =  gymProfilesService.findAllProfiles();
 
             gymuser_Json.put("userid", owner.get().getId());
 
@@ -157,6 +159,17 @@ public class GymOwnerController {
                 }
 
             }
+
+            if(!gymProfiles.isEmpty()){
+
+                for(GymProfiles profile:gymProfiles){
+                    JSONObject profileJson = new JSONObject();
+                    profileJson.put("id",profile.getId());
+                    profileJson.put("name",profile.getProfile_name());
+                    profileMasterList.put(profileJson);
+                }
+
+            }
             if(!expenseList.isEmpty()){
 
                 for(Map<String, Object> expense:expenseList){
@@ -174,6 +187,8 @@ public class GymOwnerController {
 
             }
 
+
+
             status = true;
             statusDesc = "Success";
         }catch(Exception e){ e.printStackTrace();}finally {
@@ -182,6 +197,7 @@ public class GymOwnerController {
             res.put("exp_total",exp_total);
             res.put("gymuser",gymuser_Json );
             res.put("expenseMasterList",expenseMasterList );
+            res.put("profileMasterList",profileMasterList );
         }
         return res.toString();
 
@@ -451,16 +467,21 @@ public class GymOwnerController {
         try {
             System.out.println("gymOwnerService --> addNewUser " + jsonReq);
             JSONObject req = new JSONObject(jsonReq);
-            String gym_id_str = req.get("gym_id").toString();
-            String name = req.get("name").toString();
-            String username = req.get("username").toString();
-            String password = req.get("password").toString();
-            String address = req.get("address").toString();
-            String profile_id_str = req.get("profile_id").toString();
-            String ph = req.get("phone").toString();
-            String email = req.get("email").toString();
-            int gym_id = Integer.valueOf(gym_id_str);
-            int profile_id = Integer.valueOf(profile_id_str);
+           // String gym_id_str = req.get("gym_id").toString();
+            //String password = req.get("password").toString();
+            //String address = req.get("address").toString();
+            //String ph = req.get("phone").toString();
+           // String email = req.get("email").toString();
+
+            int user = Common.inputIntParaNullCheck(req,"user");
+            int gym_id = Common.inputIntParaNullCheck(req,"gym_id");
+            int profile_id = Common.inputIntParaNullCheck(req,"profile_id");
+            String name = Common.inputStringParaNullCheck(req,"name");
+            String username = Common.inputStringParaNullCheck(req,"username");
+            String password = Common.inputStringParaNullCheck(req,"password");
+            String address = Common.inputStringParaNullCheck(req,"address");
+            String ph = Common.inputStringParaNullCheck(req,"ph");
+            String email = Common.inputStringParaNullCheck(req,"email");
 
 
             GymUsers gymUsers = new GymUsers();
@@ -473,6 +494,8 @@ public class GymOwnerController {
             gymUsers.setActive(true);
             gymUsers.setPhone(ph);
             gymUsers.setEmail(email);
+            gymUsers.setAddedby(user);
+            gymUsers.setUpdatedby(0);
             GymUsers owner = gymUsersService.findUserExist(gymUsers);
             GymUsers gymUsers1 = new GymUsers();
             if (owner == null){
@@ -486,6 +509,59 @@ public class GymOwnerController {
 
                     statusDesc = "Operation failed";
                 }
+            }else{
+
+                statusDesc = "User already exist";
+            }
+
+
+
+        }catch(Exception e){ e.printStackTrace();}finally {
+            res.put("status",status);
+            res.put("statusDesc",statusDesc);
+            res.put("user_id",user_id );
+        }
+        return res.toString();
+
+
+
+    }
+    @CrossOrigin
+    @PostMapping("/usernameAvailabilityCheck")
+    public String usernameAvailabilityCheck(@RequestBody String jsonReq) {
+
+        Boolean status = false;
+        String statusDesc = "Failed";
+        int user_id = 0;
+        JSONObject res = new JSONObject();
+
+        try {
+            System.out.println("gymOwnerService --> addNewUser " + jsonReq);
+            JSONObject req = new JSONObject(jsonReq);
+           // String gym_id_str = req.get("gym_id").toString();
+            //String password = req.get("password").toString();
+            //String address = req.get("address").toString();
+            //String ph = req.get("phone").toString();
+           // String email = req.get("email").toString();
+
+
+            String username = Common.inputStringParaNullCheck(req,"username");
+
+
+
+            GymUsers gymUsers = new GymUsers();
+
+            gymUsers.setUsername(username);
+
+            gymUsers.setActive(true);
+
+            GymUsers owner = gymUsersService.findUserExist(gymUsers);
+            GymUsers gymUsers1 = new GymUsers();
+            if (owner == null){
+
+
+                    statusDesc = "User name is available";
+                    status = true;
             }else{
 
                 statusDesc = "User already exist";
@@ -919,16 +995,25 @@ public class GymOwnerController {
             int gym_id = Integer.valueOf(gym_id_str);*/
             int gym_id = Common.inputIntParaNullCheck(req,"gym_id");
 
-            Optional<GymUsers> gymUsersList = gymUsersService.findCustomers(gym_id,Common.GYM_CUSTOMERS);
+            List<Map<String, Object>> gymUsersList = gymUsersService.findCustomers(gym_id,Common.GYM_CUSTOMERS);
             if(!gymUsersList.isEmpty()){
 
+                for(Map<String, Object> gymUsers:gymUsersList){
 
-                if(gymUsersList.get()!=null){
                     JSONObject profileEnt = new JSONObject();
-                    profileEnt.put("username",gymUsersList.get().getUsername());
+                    profileEnt.put("customer",gymUsers.get("username"));
+                    profileEnt.put("name",gymUsers.get("name"));
+                    profileEnt.put("phone",gymUsers.get("phone"));
+                    profileEnt.put("id",gymUsers.get("id"));
+                    profileEnt.put("addedby",gymUsers.get("added"));
+                    profileEnt.put("addedOn",gymUsers.get("created"));
+
+                   /* profileEnt.put("username",gymUsersList.get().getUsername());
                     profileEnt.put("name",gymUsersList.get().getName());
                     profileEnt.put("phone",gymUsersList.get().getPhone());
                     profileEnt.put("id",gymUsersList.get().getId());
+                    profileEnt.put("addedby",gymUsersList.get().getAddedby());
+                    profileEnt.put("addedOn",gymUsersList.get().getCreated().toString());*/
                     profile.put(profileEnt);
 
                 }
@@ -953,7 +1038,7 @@ public class GymOwnerController {
     @CrossOrigin
     @PostMapping("/loadGymMembers")
 
-    public String loadGymMemebers(@RequestBody String jsonReq) {
+    public String loadGymMembers(@RequestBody String jsonReq) {
 
         Boolean status = false;
         String statusDesc = "Failed";
@@ -971,16 +1056,25 @@ public class GymOwnerController {
             int gym_id = Common.inputIntParaNullCheck(req,"gym_id");
             int profile_id = Common.inputIntParaNullCheck(req,"profile");
 
-            Optional<GymUsers> gymUsersList = gymUsersService.findCustomers(gym_id,profile_id);
+            List<Map<String, Object>> gymUsersList = gymUsersService.findCustomers(gym_id,profile_id);
             if(!gymUsersList.isEmpty()){
 
+                for(Map<String, Object> gymUsers:gymUsersList){
 
-                if(gymUsersList.get()!=null){
                     JSONObject profileEnt = new JSONObject();
-                    profileEnt.put("username",gymUsersList.get().getUsername());
+                    profileEnt.put("username",gymUsers.get("username"));
+                    profileEnt.put("name",gymUsers.get("name"));
+                    profileEnt.put("phone",gymUsers.get("phone"));
+                    profileEnt.put("id",gymUsers.get("id"));
+                    profileEnt.put("addedby",gymUsers.get("added"));
+                    profileEnt.put("addedOn",gymUsers.get("created"));
+
+                   /* profileEnt.put("username",gymUsersList.get().getUsername());
                     profileEnt.put("name",gymUsersList.get().getName());
                     profileEnt.put("phone",gymUsersList.get().getPhone());
                     profileEnt.put("id",gymUsersList.get().getId());
+                    profileEnt.put("addedby",gymUsersList.get().getAddedby());
+                    profileEnt.put("addedOn",gymUsersList.get().getCreated().toString());*/
                     profile.put(profileEnt);
 
                 }
