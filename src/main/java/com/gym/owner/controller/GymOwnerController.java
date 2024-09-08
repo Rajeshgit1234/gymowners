@@ -37,6 +37,9 @@ public class GymOwnerController {
     @Autowired
     private GymUserPaymentsService   gymUserPaymentsService;
 
+    @Autowired
+    private GymOwnersService gymOwnersService;
+
     @CrossOrigin
     @PostMapping("/weblogin")
     public String login(@RequestBody String jsonReq) {
@@ -116,6 +119,66 @@ public class GymOwnerController {
 
 
     }
+
+    @CrossOrigin
+    @PostMapping("/markgymowner")
+    public String markgymowner(@RequestBody String jsonReq) {
+
+        Boolean status = false;
+        String statusDesc = "Failed";
+
+
+        int id =0;
+        JSONObject res = new JSONObject();
+
+        try{
+            System.out.println("gymOwnerService --> jsonReq "+jsonReq);
+            JSONObject req = new JSONObject(jsonReq);
+
+            int gym = Common.inputIntParaNullCheck(req,"gym");
+            int ownerid = Common.inputIntParaNullCheck(req,"owner");
+            int addedby = Common.inputIntParaNullCheck(req,"addedby");
+
+            if(gym!=0 && ownerid!=0 && addedby!=0) {
+
+                GymOwners owner = new GymOwners();
+                owner.setActive(true);
+                owner.setOwner(ownerid);
+                owner.setGymid(gym);
+                owner.setAddedby(addedby);
+
+
+                GymOwners ownerisExists = gymOwnersService.findOwnerExist(owner);
+                if (ownerisExists == null) {
+
+                    GymOwners newOwner = new GymOwners();
+                    newOwner = gymOwnersService.saveOwner(owner);
+                    System.out.println("markgymowner :: " + newOwner.getId());
+                    id = newOwner.getId();
+
+                    statusDesc = "Marked as Gym Owner ";
+                    status = true;
+                } else {
+
+
+                    statusDesc = "User is already owner for the same gym";
+
+                }
+            }else{
+
+                statusDesc = "wrong user";
+            }
+
+        }catch(Exception e){ e.printStackTrace();}finally {
+            res.put("status",status);
+            res.put("statusDesc",statusDesc);
+            res.put("id",id );
+        }
+        return res.toString();
+
+
+
+    }
     @PostMapping("/homeData")
     public String homeData(@RequestBody String jsonReq) {
 
@@ -124,6 +187,7 @@ public class GymOwnerController {
         JSONObject gymuser_Json = new JSONObject();
         JSONArray expenseMasterList =new JSONArray();
         JSONArray profileMasterList =new JSONArray();
+        JSONArray gymList =new JSONArray();
 
         int gym_id =0;
         int user_id =0;
@@ -142,7 +206,6 @@ public class GymOwnerController {
             System.out.println("Months first date in yyyy-mm-dd: " +todaydate.withDayOfMonth(1));
             Optional<GymUsers> owner=  gymUsersService.findByUser_id(user_id);
             Optional<GymList> gym=  gymListService.findById(gym_id);
-
 
             List<Map<String, Object>> expenseList= gymExpenseListService.getExpenseSumMonth(gym_id,new Timestamp(DATE_TIME_FORMAT.parse(todaydate.withDayOfMonth(1).toString()).getTime()));
             System.out.println("Months first date in yyyy-mm-dd: " +todaydate.withDayOfMonth(1));
@@ -199,6 +262,25 @@ public class GymOwnerController {
 
             }
 
+            if(owner.get().getProfile()==Common.GYM_OWNERS){
+
+                List<GymOwners>  ownerGymList = gymOwnersService.getAllOwnerGymDetails(owner.get().getId());
+
+                if(!ownerGymList.isEmpty()){
+
+                    for (GymOwners own:ownerGymList) {
+
+
+                        JSONObject ownerList = new JSONObject();
+                        ownerList.put("gymid",own.getGymid());
+                        gymList.put(ownerList);
+                    }
+
+
+
+                }
+
+            }
 
 
             status = true;
@@ -209,6 +291,7 @@ public class GymOwnerController {
             res.put("exp_total",exp_total);
             res.put("gymuser",gymuser_Json );
             res.put("expenseMasterList",expenseMasterList );
+            res.put("gymList",gymList );
             res.put("profileMasterList",profileMasterList );
         }
         return res.toString();
@@ -511,6 +594,8 @@ public class GymOwnerController {
             gymUsers.setEmail(email);
             gymUsers.setAddedby(user);
             gymUsers.setUpdatedby(0);
+            gymUsers.setApplog(false);
+            gymUsers.setWeblog(false);
             GymUsers owner = gymUsersService.findUserExist(gymUsers);
             GymUsers gymUsers1 = new GymUsers();
             if (owner == null){
@@ -698,18 +783,19 @@ public class GymOwnerController {
         try {
             System.out.println("gymOwnerService --> addNewGym " + jsonReq);
             JSONObject req = new JSONObject(jsonReq);
-            String gym_name = req.get("gym_name").toString();
-            String adress = req.get("adress").toString();
-            String description = req.get("description").toString();
-            String added_id_str = req.get("user_id").toString();
-            int user_id = Integer.valueOf(added_id_str);
+
+
+            String gym_name =Common.inputStringParaNullCheck(req,"gym_name");
+            String address =Common.inputStringParaNullCheck(req,"address");
+            String description =Common.inputStringParaNullCheck(req,"description");
+            int user_id =Common.inputIntParaNullCheck(req,"user_id");
 
 
             GymList gymList = new GymList();
             gymList.setDescription(description);
             gymList.setName(gym_name);
             gymList.setGym_name(gym_name);
-            gymList.setAdress(adress);
+            gymList.setAdress(address);
             gymList.setCreated_by(user_id);
             gymList.setActive(true);
             GymList gym = gymListService.saveGym(gymList);

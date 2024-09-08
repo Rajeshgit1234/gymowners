@@ -11,7 +11,7 @@ import java.util.Optional;
 
 public interface GymUsersRepo extends JpaRepository<GymUsers, Integer> {
 
-    @Query("SELECT u FROM GymUsers u WHERE u.phone = :phone and u.password = :password and u.active=true")
+    @Query("SELECT u FROM GymUsers u WHERE u.phone = :phone and u.password = :password and u.active=true and u.weblog=true")
     public GymUsers loginGymUsers(@Param("phone") String phone, @Param("password") String password);
 
     public GymUsers findByUsernameAndActive(String username, boolean active);

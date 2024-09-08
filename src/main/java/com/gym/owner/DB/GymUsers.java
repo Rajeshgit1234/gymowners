@@ -31,14 +31,17 @@ public class GymUsers {
     private Timestamp updated;
 
 
-    private Boolean active;
     private int profile;
     private int addedby;
     private int updatedby;
     private String phone;
     private String email;
+    private Boolean active;
+    private Boolean weblog;
+    private Boolean applog;
 
-    public GymUsers(int id, int gym, String name, String username, String password, String address, Timestamp created, Timestamp updated, Boolean active, int profile, int addedby, int updatedby, String phone, String email) {
+
+    public GymUsers(int id, int gym, String name, String username, String password, String address, Timestamp created, Timestamp updated, int profile, int addedby, int updatedby, String phone, String email, Boolean active, Boolean weblog, Boolean applog) {
         this.id = id;
         this.gym = gym;
         this.name = name;
@@ -47,12 +50,14 @@ public class GymUsers {
         this.address = address;
         this.created = created;
         this.updated = updated;
-        this.active = active;
         this.profile = profile;
         this.addedby = addedby;
         this.updatedby = updatedby;
         this.phone = phone;
         this.email = email;
+        this.active = active;
+        this.weblog = weblog;
+        this.applog = applog;
     }
 
     public GymUsers() {
@@ -123,14 +128,6 @@ public class GymUsers {
         this.updated = updated;
     }
 
-    public Boolean getActive() {
-        return active;
-    }
-
-    public void setActive(Boolean active) {
-        this.active = active;
-    }
-
     public int getProfile() {
         return profile;
     }
@@ -169,5 +166,29 @@ public class GymUsers {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public Boolean getActive() {
+        return active;
+    }
+
+    public void setActive(Boolean active) {
+        this.active = active;
+    }
+
+    public Boolean getWeblog() {
+        return weblog;
+    }
+
+    public void setWeblog(Boolean weblog) {
+        this.weblog = weblog;
+    }
+
+    public Boolean getApplog() {
+        return applog;
+    }
+
+    public void setApplog(Boolean applog) {
+        this.applog = applog;
     }
 }
