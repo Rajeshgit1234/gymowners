@@ -1095,8 +1095,15 @@ public class GymOwnerController {
             /*String gym_id_str = req.get("gym_id").toString();
             int gym_id = Integer.valueOf(gym_id_str);*/
             int gym_id = Common.inputIntParaNullCheck(req,"gym_id");
+            int offset = Common.inputIntParaNullCheck(req,"offset");
+            String phone = Common.inputStringParaNullCheck(req,"phone");
+            List<Map<String, Object>> gymUsersList = null;
+            if(phone.length()!=0){
 
-            List<Map<String, Object>> gymUsersList = gymUsersService.findCustomers(gym_id,Common.GYM_CUSTOMERS);
+                gymUsersList = gymUsersService.findCustomersWithPhone(gym_id, offset,phone);
+            }else {
+                gymUsersList = gymUsersService.findCustomers(gym_id, Common.GYM_CUSTOMERS, offset);
+            }
             if(!gymUsersList.isEmpty()){
 
                 for(Map<String, Object> gymUsers:gymUsersList){
@@ -1156,8 +1163,16 @@ public class GymOwnerController {
             int gym_id = Integer.valueOf(gym_id_str);*/
             int gym_id = Common.inputIntParaNullCheck(req,"gym_id");
             int profile_id = Common.inputIntParaNullCheck(req,"profile");
+            int offset = Common.inputIntParaNullCheck(req,"offset");
 
-            List<Map<String, Object>> gymUsersList = gymUsersService.findCustomers(gym_id,profile_id);
+            String phone = Common.inputStringParaNullCheck(req,"phone");
+            List<Map<String, Object>> gymUsersList = null;
+            if(phone.length()!=0){
+
+                gymUsersList = gymUsersService.findCustomersWithPhone(gym_id, 0,phone);
+            }else {
+                gymUsersList = gymUsersService.findCustomers(gym_id, Common.GYM_CUSTOMERS, offset);
+            }
             if(!gymUsersList.isEmpty()){
 
                 for(Map<String, Object> gymUsers:gymUsersList){
