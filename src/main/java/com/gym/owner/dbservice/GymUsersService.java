@@ -45,5 +45,16 @@ public class GymUsersService {
 
         return  gymUsersRepo.findByPhoneAndActive(gymUsers.getPhone(), gymUsers.getActive());
     }
+    public GymUsers verifyToken(GymUsers gymUsers) {
+
+        return  gymUsersRepo.verifyToken(gymUsers.getUniquetoken());
+    } public GymUsers verifyTokenAndPhone(GymUsers gymUsers) {
+
+        return  gymUsersRepo.verifyTokenAndPhone(gymUsers.getUniquetoken(),gymUsers.getPhone());
+    }
+    public Integer regToken(String phone,String password) {
+
+        return  gymUsersRepo.regToken(phone,password);
+    }
 
 }

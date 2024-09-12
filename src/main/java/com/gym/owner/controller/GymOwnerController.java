@@ -578,6 +578,11 @@ public class GymOwnerController {
             String phone = Common.inputStringParaNullCheck(req,"phone");
             String email = Common.inputStringParaNullCheck(req,"email");
 
+
+            long uniqueIDL = System.currentTimeMillis();
+            String uniqueID = uniqueIDL+""+UUID.randomUUID().toString();
+
+
             if(phone.substring(0,2).equals("91")){
 
                 phone = phone.substring(2,phone.length());
@@ -593,6 +598,7 @@ public class GymOwnerController {
             gymUsers.setPhone(phone);
             gymUsers.setEmail(email);
             gymUsers.setAddedby(user);
+            gymUsers.setUniquetoken(uniqueID);
             gymUsers.setUpdatedby(0);
             gymUsers.setApplog(false);
             gymUsers.setWeblog(false);
@@ -620,6 +626,130 @@ public class GymOwnerController {
             res.put("status",status);
             res.put("statusDesc",statusDesc);
             res.put("user_id",user_id );
+        }
+        return res.toString();
+
+
+
+    }
+    @CrossOrigin
+    @PostMapping("/verifyToken")
+    public String verifyToken(@RequestBody String jsonReq) {
+
+        Boolean status = false;
+        String statusDesc = "Failed";
+        String phone = "";
+        JSONObject res = new JSONObject();
+
+        try {
+            System.out.println("gymOwnerService --> addNewUser " + jsonReq);
+            JSONObject req = new JSONObject(jsonReq);
+
+
+
+            String token = Common.inputStringParaNullCheck(req,"token");
+
+
+            GymUsers gymUsers = new GymUsers();
+
+            gymUsers.setUniquetoken(token);
+
+            GymUsers owner = gymUsersService.verifyToken(gymUsers);
+
+            if (owner != null){
+
+                if(owner.getUniquetoken().length()!=0){
+
+                    statusDesc = "User   exist";
+                    phone = owner.getPhone();
+                    status = true;
+                }else{
+
+                    statusDesc = "User not  exist";
+                }
+            }else{
+
+                statusDesc = "User not  exist";
+            }
+
+
+
+        }catch(Exception e){ e.printStackTrace();}finally {
+            res.put("status",status);
+            res.put("statusDesc",statusDesc);
+            res.put("phone",phone );
+        }
+        return res.toString();
+
+
+
+    }
+
+    @CrossOrigin
+    @PostMapping("/registerToken")
+    public String registerToken(@RequestBody String jsonReq) {
+
+        Boolean status = false;
+        String statusDesc = "Failed";
+
+        JSONObject res = new JSONObject();
+
+        try {
+            System.out.println("gymOwnerService --> addNewUser " + jsonReq);
+            JSONObject req = new JSONObject(jsonReq);
+
+
+
+            String token = Common.inputStringParaNullCheck(req,"token");
+            String phone = Common.inputStringParaNullCheck(req,"phone");
+            String password = Common.inputStringParaNullCheck(req,"password");
+
+            if (phone!=null && phone.length()!=0){
+
+                if(phone.substring(0,2).equals("91")){
+
+                    phone = phone.substring(2,phone.length());
+                }
+
+
+                GymUsers gymUsers = new GymUsers();
+
+                gymUsers.setUniquetoken(token);
+                gymUsers.setPhone(phone);
+                GymUsers owner = gymUsersService.verifyTokenAndPhone(gymUsers);
+
+                if (owner != null){
+
+                    if(owner.getUniquetoken().length()!=0){
+
+
+                        int updated = gymUsersService.regToken(phone,password);
+                        if(updated!=0){
+
+                            status = true;
+                            statusDesc = "User registered successfully";
+                        }
+
+                    }else{
+
+                        statusDesc = "User not  exist";
+                    }
+                }else{
+
+                    statusDesc = "User not  exist";
+                }
+
+
+            }else{
+
+                statusDesc = "User not  exist";
+            }
+
+
+
+        }catch(Exception e){ e.printStackTrace();}finally {
+            res.put("status",status);
+            res.put("statusDesc",statusDesc);
         }
         return res.toString();
 

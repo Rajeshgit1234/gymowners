@@ -36,12 +36,13 @@ public class GymUsers {
     private int updatedby;
     private String phone;
     private String email;
+    private String uniquetoken;
     private Boolean active;
     private Boolean weblog;
     private Boolean applog;
 
 
-    public GymUsers(int id, int gym, String name, String username, String password, String address, Timestamp created, Timestamp updated, int profile, int addedby, int updatedby, String phone, String email, Boolean active, Boolean weblog, Boolean applog) {
+    public GymUsers(int id, int gym, String name, String username, String password, String address, Timestamp created, Timestamp updated, int profile, int addedby, int updatedby, String phone, String email, String uniquetoken, Boolean active, Boolean weblog, Boolean applog) {
         this.id = id;
         this.gym = gym;
         this.name = name;
@@ -55,6 +56,7 @@ public class GymUsers {
         this.updatedby = updatedby;
         this.phone = phone;
         this.email = email;
+        this.uniquetoken = uniquetoken;
         this.active = active;
         this.weblog = weblog;
         this.applog = applog;
@@ -63,6 +65,7 @@ public class GymUsers {
     public GymUsers() {
 
     }
+
 
     public int getId() {
         return id;
@@ -166,6 +169,14 @@ public class GymUsers {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getUniquetoken() {
+        return uniquetoken;
+    }
+
+    public void setUniquetoken(String uniquetoken) {
+        this.uniquetoken = uniquetoken;
     }
 
     public Boolean getActive() {
