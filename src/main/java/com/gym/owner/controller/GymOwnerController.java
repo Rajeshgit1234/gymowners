@@ -40,6 +40,9 @@ public class GymOwnerController {
     @Autowired
     private GymOwnersService gymOwnersService;
 
+    @Autowired
+    private GymWebAccessService gymWebAccessService;
+
     @CrossOrigin
     @PostMapping("/weblogin")
     public String login(@RequestBody String jsonReq) {
@@ -610,7 +613,27 @@ public class GymOwnerController {
                     System.out.println("gymExpenseListService :: " + gymUsers1.getId());
                     statusDesc = "User added successfully";
                     user_id = gymUsers1.getId();
+                    Common.sendRegisterLink(uniqueID,phone);
                     status = true;
+                    if(profile_id==Common.GYM_OWNERS){
+
+                        GymOwners owner1 = new GymOwners();
+                        owner1.setActive(true);
+                        owner1.setOwner(user_id);
+                        owner1.setGymid(gym_id);
+                        owner1.setAddedby(user);
+
+
+                        GymOwners ownerisExists = gymOwnersService.findOwnerExist(owner1);
+                        if (ownerisExists == null) {
+
+                            GymOwners newOwner = new GymOwners();
+                            newOwner = gymOwnersService.saveOwner(owner1);
+                            System.out.println("markgymowner :: " + newOwner.getId());
+
+                        }
+
+                    }
                 } else {
 
                     statusDesc = "Operation failed";
@@ -858,7 +881,6 @@ public class GymOwnerController {
         JSONObject res = new JSONObject();
 
         try {
-            System.out.println("gymOwnerService --> addNewGym " + jsonReq);
             JSONObject req = new JSONObject(jsonReq);
             String profile_name = req.get("profile_name").toString();
             int gym_id = 0;
@@ -929,11 +951,30 @@ public class GymOwnerController {
             gymList.setCreated_by(user_id);
             gymList.setActive(true);
             GymList gym = gymListService.saveGym(gymList);
-            if (gym == null){
+            if (gym != null){
 
                     System.out.println("gymExpenseListService :: " + gym.getId());
-                    statusDesc = "User added successfully";
+                    statusDesc = "GYM created successfully";
                     gym_id = gym.getId();
+
+                    List<GymProfiles> profiles = gymProfilesService.findAllProfiles();
+                    if(!profiles.isEmpty() && gym_id!=0){
+
+                        for(GymProfiles profile : profiles){
+
+                            for (String access:Common.access_list) {
+                                GymWebAccess webAccess = new GymWebAccess();
+                                webAccess.setProfile(profile.getId());
+                                webAccess.setGymid(gym_id);
+                                webAccess.setAccess(access);
+                                webAccess.setStatus(true);
+                                gymWebAccessService.saveProfile(webAccess);
+                            }
+
+                        }
+
+                    }
+
                     status = true;
 
             }else{

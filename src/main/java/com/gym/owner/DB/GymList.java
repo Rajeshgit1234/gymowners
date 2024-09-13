@@ -12,7 +12,7 @@ import java.sql.Timestamp;
 public class GymList {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private int id;
     private int created_by;
     private String name;
