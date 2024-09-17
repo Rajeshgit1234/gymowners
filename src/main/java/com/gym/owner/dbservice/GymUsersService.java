@@ -37,6 +37,10 @@ public class GymUsersService {
 
         return  gymUsersRepo.loginGymUsers(phone,password);
     }
+    public int updatePassword(int userid, String password){
+
+        return  gymUsersRepo.updatePassword(userid,password);
+    }
     public GymUsers saveUser(GymUsers gymUsers) {
 
         return  gymUsersRepo.save(gymUsers);

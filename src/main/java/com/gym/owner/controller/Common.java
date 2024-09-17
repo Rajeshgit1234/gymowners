@@ -10,6 +10,8 @@ public class Common {
 
     public static final int GYM_CUSTOMERS= 253;//based on profile table id
     public static final int GYM_OWNERS= 252;
+    static int days [] = { 31, 28, 31, 30, 31, 30,
+            31, 31, 30, 31, 30, 31 };
     public static final String WEB_LINK= "http://localhost:8080/WebAppGym/regvostro?tk=";
     public static final List<String> access_list = Arrays.asList("exp", "pay", "settings");
     public static String  checkNull(String value){
@@ -19,6 +21,7 @@ public class Common {
             return value;
         }
     }
+
 
     public static void  sendRegisterLink(String token,String phone){
         String weblink = WEB_LINK+token;

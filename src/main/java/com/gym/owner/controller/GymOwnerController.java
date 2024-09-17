@@ -12,6 +12,7 @@ import java.sql.Timestamp;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @RestController
@@ -42,6 +43,9 @@ public class GymOwnerController {
 
     @Autowired
     private GymWebAccessService gymWebAccessService;
+
+    @Autowired
+    private GymAttendanceService gymAttendanceService;
 
     @CrossOrigin
     @PostMapping("/weblogin")
@@ -116,6 +120,302 @@ public class GymOwnerController {
             res.put("statusDesc",statusDesc);
             res.put("gym_id",gym_id );
             res.put("user_id",user_id );
+        }
+        return res.toString();
+
+
+
+    }
+    @CrossOrigin
+    @PostMapping("/changepassword")
+    public String changepassword(@RequestBody String jsonReq) {
+
+        Boolean status = false;
+        String statusDesc = "Failed";
+
+
+        int gym_id =0;
+        int user_id =0;
+        JSONObject res = new JSONObject();
+
+        try{
+            System.out.println("gymOwnerService --> jsonReq "+jsonReq);
+            JSONObject req = new JSONObject(jsonReq);
+
+            int userid = Common.inputIntParaNullCheck(req,"userid");
+            String password = Common.inputStringParaNullCheck(req,"password");
+
+            if(userid!=0 && password.length()!=0) {
+
+
+                if(gymUsersService.updatePassword(userid, password)>0){;
+
+
+                    statusDesc = "Change password  success";
+                    status = true;
+                }else{
+                    statusDesc = "Change password  failed";
+                }
+
+            }else{
+
+                statusDesc = "Change password failed";
+
+            }
+
+
+        }catch(Exception e){ e.printStackTrace();}finally {
+            res.put("status",status);
+            res.put("statusDesc",statusDesc);
+
+        }
+        return res.toString();
+
+
+
+    }
+    @CrossOrigin
+    @PostMapping("/addNewExpItem")
+    public String addNewExpItem(@RequestBody String jsonReq) {
+
+        Boolean status = false;
+        String statusDesc = "Failed";
+
+
+
+        JSONObject res = new JSONObject();
+
+        try{
+            System.out.println("gymOwnerService --> jsonReq "+jsonReq);
+            JSONObject req = new JSONObject(jsonReq);
+
+            int user_id = Common.inputIntParaNullCheck(req,"user_id");
+            int gym_id = Common.inputIntParaNullCheck(req,"gym_id");
+            String expItem = Common.inputStringParaNullCheck(req,"expItem");
+
+            if(user_id!=0  && expItem.length()!=0) {
+
+
+                if(expenseMasterService.checkIfExist(gym_id,expItem.toUpperCase())==null){;
+
+
+                    ExpenseMaster expenseMaster = new ExpenseMaster();
+                    expenseMaster.setGym_id(gym_id);
+                    expenseMaster.setExpense_item(expItem);
+                    expenseMaster.setStatus(true);
+                    expenseMaster.setAdded(user_id);
+                    expenseMaster.setUpdatedby(user_id);
+                    expenseMasterService.saveExpenseMaster(expenseMaster);
+                    statusDesc = "Item added success";
+                    status = true;
+                }else{
+                    statusDesc = "Item already exist";
+                }
+
+            }else{
+
+                statusDesc = "Mandatory fields are missing";
+
+            }
+
+
+        }catch(Exception e){ e.printStackTrace();}finally {
+            res.put("status",status);
+            res.put("statusDesc",statusDesc);
+
+        }
+        return res.toString();
+
+
+
+    }
+
+    @CrossOrigin
+    @PostMapping("/markAttendance")
+    public String markAttendance(@RequestBody String jsonReq) {
+
+        Boolean status = false;
+        String statusDesc = "Failed";
+        int attendanceid = 0;
+
+
+        JSONObject res = new JSONObject();
+
+        try{
+            System.out.println("gymOwnerService --> jsonReq "+jsonReq);
+            JSONObject req = new JSONObject(jsonReq);
+
+            int user_id = Common.inputIntParaNullCheck(req,"user_id");
+            int gym_id = Common.inputIntParaNullCheck(req,"gym_id");
+            int year = Common.inputIntParaNullCheck(req,"year");
+            int fromhour = Common.inputIntParaNullCheck(req,"fromhour");
+            int tohour = Common.inputIntParaNullCheck(req,"tohour");
+            int added = Common.inputIntParaNullCheck(req,"added");
+            String date = Common.inputStringParaNullCheck(req,"date");
+
+            if(user_id!=0  && gym_id!=0 && year!=0 && fromhour!=0 && tohour!=0 && added!=0 && date.length()!=0) {
+
+                LocalDate dateString = LocalDate.parse(date);
+                int doy = dateString.getDayOfYear();
+
+
+            if(doy!=0) {
+                GymAttendance gymAttendance = new GymAttendance();
+                gymAttendance.setGymid(gym_id);
+                gymAttendance.setYear(year);
+                gymAttendance.setFromhour(fromhour);
+                gymAttendance.setTohour(tohour);
+                gymAttendance.setAdded(added);
+                gymAttendance.setStatus(true);
+                gymAttendance.setDoy(doy);
+                GymAttendance gymAttendanceNew = gymAttendanceService.save(gymAttendance);
+                if(gymAttendanceNew!=null) {
+
+                    attendanceid = gymAttendanceNew.getId();
+                    statusDesc = "Attendance added success";
+                    status = true;
+                }else{
+
+                    statusDesc = "Operation failed";
+                }
+
+            }else{
+
+                statusDesc = "Invalid date";
+            }
+
+            }else{
+
+                statusDesc = "Mandatory fields are missing";
+
+            }
+
+
+        }catch(Exception e){ e.printStackTrace();}finally {
+            res.put("status",status);
+            res.put("statusDesc",statusDesc);
+            res.put("attendanceid",attendanceid);
+
+        }
+        return res.toString();
+
+
+
+    }
+    @CrossOrigin
+    @PostMapping("/getExpMasterList")
+    public String getExpMasterList(@RequestBody String jsonReq) {
+
+        Boolean status = false;
+        String statusDesc = "Failed";
+        JSONArray expMasterList = new JSONArray();
+
+
+        JSONObject res = new JSONObject();
+
+        try{
+            System.out.println("gymOwnerService --> jsonReq "+jsonReq);
+            JSONObject req = new JSONObject(jsonReq);
+
+
+            int gym_id = Common.inputIntParaNullCheck(req,"gym_id");
+            int offset = Common.inputIntParaNullCheck(req,"offset");
+
+
+            if(gym_id!=0  ) {
+
+
+                List<Map<String, Object>> listExpMasters = expenseMasterService.findActiveExpenseMasterBasesGYM(gym_id,offset);
+                for (Map<String, Object> map : listExpMasters) {
+
+                    JSONObject expMaster = new JSONObject();
+                    expMaster.put("expItem", map.get("expItem"));
+                    expMaster.put("addedby", map.get("addedby"));
+                    expMaster.put("expId", map.get("expId"));
+                    String added = "";
+                    if (map.get("added") !=null){added=map.get("added").toString();}
+                    expMaster.put("added",added );
+                    expMasterList.put(expMaster);
+
+                }
+                status =true;
+                statusDesc="Data fetched successfully";
+
+            }else{
+
+                statusDesc = "Mandatory fields are missing";
+
+            }
+
+
+        }catch(Exception e){ e.printStackTrace();}finally {
+            res.put("status",status);
+            res.put("statusDesc",statusDesc);
+            res.put("expMasterList",expMasterList);
+
+        }
+        return res.toString();
+
+
+
+    }
+
+    @CrossOrigin
+    @PostMapping("/delExpMasterItem")
+    public String delExpMasterItem(@RequestBody String jsonReq) {
+
+        Boolean status = false;
+        String statusDesc = "Failed";
+        JSONArray expMasterList = new JSONArray();
+
+
+        JSONObject res = new JSONObject();
+
+        try{
+            System.out.println("gymOwnerService --> jsonReq "+jsonReq);
+            JSONObject req = new JSONObject(jsonReq);
+
+
+            int gym_id = Common.inputIntParaNullCheck(req,"gym_id");
+            int userid = Common.inputIntParaNullCheck(req,"userid");
+            int itemId = Common.inputIntParaNullCheck(req,"itemId");
+
+
+            if(gym_id!=0  && itemId!=0) {
+
+                if(expenseMasterService.checkIfExistItemId(gym_id,itemId)!=null){
+
+
+                    if( expenseMasterService.updateExpMasterItem(gym_id,userid,itemId)!=0){
+
+                        status = true;
+                        statusDesc="Data deleted successfully";
+                    }else{
+
+                        statusDesc="Operation failed";
+
+                    }
+                }else{
+
+                    statusDesc="Item not exist";
+                }
+
+
+
+
+
+            }else{
+
+                statusDesc = "Mandatory fields are missing";
+
+            }
+
+
+        }catch(Exception e){ e.printStackTrace();}finally {
+            res.put("status",status);
+            res.put("statusDesc",statusDesc);
+            res.put("expMasterList",expMasterList);
+
         }
         return res.toString();
 

@@ -17,6 +17,11 @@ public interface GymUsersRepo extends JpaRepository<GymUsers, Integer> {
     @Query("SELECT u FROM GymUsers u WHERE u.phone = :phone and u.password = :password and u.active=true and u.weblog=true")
     public GymUsers loginGymUsers(@Param("phone") String phone, @Param("password") String password);
 
+    @Modifying
+    @Transactional
+    @Query("update GymUsers u set u.password=:password WHERE u.id = :userid and u.active=true and u.weblog=true")
+    public int updatePassword(@Param("userid") int userid, @Param("password") String password);
+
     public GymUsers findByUsernameAndActive(String username, boolean active);
     public GymUsers findByPhoneAndActive(String phone, boolean active);
 
