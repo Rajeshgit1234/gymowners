@@ -12,6 +12,7 @@ import java.sql.Timestamp;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.Year;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
@@ -255,29 +256,114 @@ public class GymOwnerController {
 
             if(user_id!=0  && gym_id!=0 && year!=0 && fromhour!=0 && tohour!=0 && added!=0 && date.length()!=0) {
 
+                if(fromhour<tohour){
+                    LocalDate dateString = LocalDate.parse(date);
+                    int doy = dateString.getDayOfYear();
+
+
+                    if(doy!=0) {
+                        GymAttendance gymAttendance = new GymAttendance();
+                        gymAttendance.setGymid(gym_id);
+                        gymAttendance.setYear(year);
+                        gymAttendance.setFromhour(fromhour);
+                        gymAttendance.setTohour(tohour);
+                        gymAttendance.setAdded(added);
+                        gymAttendance.setStatus(true);
+                        gymAttendance.setDoy(doy);
+                        gymAttendance.setUserid(user_id);
+                        GymAttendance gymAttendanceNew = gymAttendanceService.save(gymAttendance);
+                        if(gymAttendanceNew!=null) {
+
+                            attendanceid = gymAttendanceNew.getId();
+                            statusDesc = "Attendance added success";
+                            status = true;
+                        }else{
+
+                            statusDesc = "Operation failed";
+                        }
+
+                    }else{
+
+                        statusDesc = "Invalid date";
+                    }
+                }else{
+
+                    statusDesc = "Invalid date";
+                }
+
+            }else{
+
+                statusDesc = "Mandatory fields are missing";
+
+            }
+
+
+        }catch(Exception e){ e.printStackTrace();}finally {
+            res.put("status",status);
+            res.put("statusDesc",statusDesc);
+            res.put("attendanceid",attendanceid);
+
+        }
+        return res.toString();
+
+
+
+    }
+
+    @CrossOrigin
+    @PostMapping("/viewAttendance")
+    public String viewAttendance(@RequestBody String jsonReq) {
+
+        Boolean status = false;
+        String statusDesc = "Failed";
+
+
+        JSONObject res = new JSONObject();
+        JSONArray AttJson = new JSONArray();
+
+        try{
+            System.out.println("gymOwnerService --> jsonReq "+jsonReq);
+            JSONObject req = new JSONObject(jsonReq);
+
+            int gym_id = Common.inputIntParaNullCheck(req,"gym_id");
+            int offset = Common.inputIntParaNullCheck(req,"offset");
+
+            String date = Common.inputStringParaNullCheck(req,"date");
+
+            if( gym_id!=0  && date.length()!=0) {
+
                 LocalDate dateString = LocalDate.parse(date);
                 int doy = dateString.getDayOfYear();
 
 
             if(doy!=0) {
-                GymAttendance gymAttendance = new GymAttendance();
-                gymAttendance.setGymid(gym_id);
-                gymAttendance.setYear(year);
-                gymAttendance.setFromhour(fromhour);
-                gymAttendance.setTohour(tohour);
-                gymAttendance.setAdded(added);
-                gymAttendance.setStatus(true);
-                gymAttendance.setDoy(doy);
-                GymAttendance gymAttendanceNew = gymAttendanceService.save(gymAttendance);
-                if(gymAttendanceNew!=null) {
 
-                    attendanceid = gymAttendanceNew.getId();
-                    statusDesc = "Attendance added success";
+
+                List<Map<String, Object>> attendanceList= gymAttendanceService.findAllByGymId(gym_id,doy,offset);
+
+                if(!attendanceList.isEmpty()) {
+
+                    for (Map<String, Object> attendance : attendanceList) {
+                        JSONObject AttItem = new JSONObject();
+
+
+                        AttItem.put("attid", attendance.get("attid"));
+                        AttItem.put("date", date);
+                        AttItem.put("user", ((attendance.get("user") == null) ? "N/A" : attendance.get("user")));
+                        AttItem.put("doy", ((attendance.get("doy") == null) ? "N/A" : attendance.get("doy")));
+                        AttItem.put("year", ((attendance.get("year") == null) ? "N/A" : attendance.get("year")));
+                        AttItem.put("fromhour", ((attendance.get("fromhour") == null) ? "N/A" : attendance.get("fromhour")));
+                        AttItem.put("tohour", ((attendance.get("tohour") == null) ? "N/A" : attendance.get("tohour")));
+                        AttItem.put("createdon", ((attendance.get("createdon") == null) ? "N/A" : attendance.get("createdon")));
+
+                        AttJson.put(AttItem);
+                    }
+                    statusDesc = "Fetched successfully";
                     status = true;
-                }else{
-
-                    statusDesc = "Operation failed";
+                }else {
+                    statusDesc = "Fetched successfully";
                 }
+
 
             }else{
 
@@ -294,7 +380,164 @@ public class GymOwnerController {
         }catch(Exception e){ e.printStackTrace();}finally {
             res.put("status",status);
             res.put("statusDesc",statusDesc);
-            res.put("attendanceid",attendanceid);
+            res.put("attendance",AttJson);
+
+        }
+        return res.toString();
+
+
+
+    }
+    @CrossOrigin
+    @PostMapping("/viewAttendanceMonth")
+    public String viewAttendanceMonth(@RequestBody String jsonReq) {
+
+        Boolean status = false;
+        String statusDesc = "Failed";
+
+        HashMap<String ,String> attHash = new HashMap<>();
+        JSONObject res = new JSONObject();
+        JSONObject AttJson = new JSONObject();
+        JSONArray doyJson = new JSONArray();
+        JSONArray attJSONArray = new JSONArray();
+        JSONArray custJson = new JSONArray();
+
+        try{
+            System.out.println("gymOwnerService --> jsonReq "+jsonReq);
+            JSONObject req = new JSONObject(jsonReq);
+
+            int gym_id = Common.inputIntParaNullCheck(req,"gym_id");
+            int offset = Common.inputIntParaNullCheck(req,"offset");
+
+            String from = Common.inputStringParaNullCheck(req,"from");
+            String to = Common.inputStringParaNullCheck(req,"to");
+
+            int doyFrom = 0;
+            int doyTo = 0;
+            if( gym_id!=0  ) {
+
+
+                if (from.length()!=0 && to.length()!=0) {
+
+                    LocalDate dateString = LocalDate.parse(from);
+                    LocalDate dateTo = LocalDate.parse(to);
+                    doyFrom = dateString.getDayOfYear();
+                    doyTo = dateTo.getDayOfYear();
+                }else{
+
+                    Calendar c = Calendar.getInstance();
+                    Calendar cend = Calendar.getInstance();
+                    doyTo = c.get(Calendar.DAY_OF_YEAR);
+                    cend.roll(Calendar.DAY_OF_YEAR, -30);
+//if within the first 30 days, need to roll the year as well
+                    if(cend.after(c)){
+                        cend.roll(Calendar.YEAR, -1);
+                    }
+                    doyFrom = cend.get(Calendar.DAY_OF_YEAR);
+
+
+                }
+
+
+
+
+
+            if(doyFrom!=0 && doyTo!=0) {
+
+
+                for(int i=doyFrom;i<=doyTo;i++) {
+
+                    int dayOfYear = i ;
+                    Year y = Year.of( Year.now().getValue());
+                    LocalDate ld = y.atDay( dayOfYear ) ;
+                    DateTimeFormatter dateformatter
+                            = DateTimeFormatter.ofPattern("dd");
+                    // display the date
+                    String date_obj = (dateformatter.format(ld));
+                    JSONObject doyJsonObj = new JSONObject();
+                    doyJsonObj.put("doy",i);
+                    doyJsonObj.put("date",date_obj);
+                    doyJson.put(doyJsonObj);
+
+                }
+
+
+
+                    List<Map<String, Object>> attendanceList= gymAttendanceService.fetchGymAttendance(gym_id,Year.now().getValue(),doyFrom,doyTo,offset);
+
+                    if(!attendanceList.isEmpty()) {
+
+                        for (Map<String, Object> attendance : attendanceList) {
+                            JSONObject AttItem = new JSONObject();
+
+
+                            String userId = (attendance.get("userid") == null) ? "" : attendance.get("userid").toString();
+                            String userName = (attendance.get("name") == null) ? "" : attendance.get("name").toString();
+
+                            AttItem.put("userid", (userId));
+                            AttItem.put("name", (userName));
+                            AttItem.put("doy", ((attendance.get("doy") == null) ? "" : attendance.get("doy")));
+                            attJSONArray.put(AttItem);
+
+                            if(attHash.get(userId)==null) {
+
+                                attHash.put(userId,userName);
+                            }
+                           /* AttItem.put("attid", attendance.get("attid"));
+                            AttItem.put("date", date);
+                            AttItem.put("user", ((attendance.get("user") == null) ? "N/A" : attendance.get("user")));
+                            AttItem.put("doy", ((attendance.get("doy") == null) ? "N/A" : attendance.get("doy")));
+                            AttItem.put("year", ((attendance.get("year") == null) ? "N/A" : attendance.get("year")));
+                            AttItem.put("fromhour", ((attendance.get("fromhour") == null) ? "N/A" : attendance.get("fromhour")));
+                            AttItem.put("tohour", ((attendance.get("tohour") == null) ? "N/A" : attendance.get("tohour")));
+                            AttItem.put("createdon", ((attendance.get("createdon") == null) ? "N/A" : attendance.get("createdon")));*/
+
+                            //AttJson.put(AttItem);
+                        }
+
+
+
+                        if (!attHash.isEmpty()){
+
+
+                            for (Map.Entry<String, String> set :
+                                    attHash.entrySet()) {
+
+                                String cust_id =set.getKey();
+                                String cust_name =set.getValue();
+                                JSONObject custJsonObj = new JSONObject();
+                                custJsonObj.put("cust_id",cust_id);
+                                custJsonObj.put("cust_name",cust_name);
+                                custJson.put( custJsonObj );
+
+
+                            }
+
+                        }
+                        statusDesc = "Fetched successfully";
+                        status = true;
+                    }
+
+
+
+            }else{
+
+                statusDesc = "Invalid date";
+            }
+
+            }else{
+
+                statusDesc = "Mandatory fields are missing";
+
+            }
+
+
+        }catch(Exception e){ e.printStackTrace();}finally {
+            res.put("status",status);
+            res.put("statusDesc",statusDesc);
+            res.put("attendance",attJSONArray);
+            res.put("doyJson",doyJson);
+            res.put("custJson",custJson);
 
         }
         return res.toString();
@@ -512,8 +755,7 @@ public class GymOwnerController {
 
             List<Map<String, Object>> expenseList= gymExpenseListService.getExpenseSumMonth(gym_id,new Timestamp(DATE_TIME_FORMAT.parse(todaydate.withDayOfMonth(1).toString()).getTime()));
             System.out.println("Months first date in yyyy-mm-dd: " +todaydate.withDayOfMonth(1));
-
-           List<GymProfiles> gymProfiles =  gymProfilesService.findAllProfiles();
+            List<GymProfiles> gymProfiles =  gymProfilesService.findAllProfiles();
 
             gymuser_Json.put("userid", owner.get().getId());
 
