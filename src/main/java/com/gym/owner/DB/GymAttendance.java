@@ -12,7 +12,8 @@ public class GymAttendance {
 
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "gym_attendance_generator")
+    @SequenceGenerator(name = "gym_attendance_generator", sequenceName = "gym_attendance_seq", allocationSize = 1)
     private int id;
     private int gymid;
     private int userid;
@@ -27,8 +28,9 @@ public class GymAttendance {
     @UpdateTimestamp
     private Timestamp updatedon;
     private Boolean status;
+    private String datedoy;
 
-    public GymAttendance(int id, int gymid, int userid, int doy, int year, int fromhour, int tohour, int added, int updated, Timestamp createdon, Timestamp updatedon, Boolean status) {
+    public GymAttendance(int id, int gymid, int userid, int doy, int year, int fromhour, int tohour, int added, int updated, Timestamp createdon, Timestamp updatedon, Boolean status, String datedoy) {
         this.id = id;
         this.gymid = gymid;
         this.userid = userid;
@@ -41,6 +43,7 @@ public class GymAttendance {
         this.createdon = createdon;
         this.updatedon = updatedon;
         this.status = status;
+        this.datedoy = datedoy;
     }
 
     public GymAttendance() {
@@ -141,5 +144,13 @@ public class GymAttendance {
 
     public void setStatus(Boolean status) {
         this.status = status;
+    }
+
+    public String getDatedoy() {
+        return datedoy;
+    }
+
+    public void setDatedoy(String datedoy) {
+        this.datedoy = datedoy;
     }
 }

@@ -12,7 +12,8 @@ import java.sql.Timestamp;
 public class GymWebAccess {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "gym_web_acess_generator")
+    @SequenceGenerator(name = "gym_web_acess_generator", sequenceName = "gym_web_acess_seq", allocationSize = 1)
     private int id;
     private String access;
     private int gymid;

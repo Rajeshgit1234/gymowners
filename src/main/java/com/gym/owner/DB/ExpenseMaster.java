@@ -14,7 +14,8 @@ public class ExpenseMaster {
 
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "expense_master_generator")
+    @SequenceGenerator(name = "expense_master_generator", sequenceName = "expense_master_seq", allocationSize = 1)
     private int id;
     private int added;
     private String  expense_item;

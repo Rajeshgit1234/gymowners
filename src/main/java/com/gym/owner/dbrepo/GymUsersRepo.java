@@ -47,4 +47,13 @@ public interface GymUsersRepo extends JpaRepository<GymUsers, Integer> {
     Integer  regToken(@Param("phone") String phone, @Param("password") String password);
 
 
+    @Modifying
+    @Transactional
+    @Query(
+            value = "update gym_users  set   recentactivity=recentactivity+1   where id=:userid and active=true ",
+            nativeQuery = true
+    )
+    Integer  updateRecentActivity(@Param("userid") int userid);
+
+
 }

@@ -271,9 +271,12 @@ public class GymOwnerController {
                         gymAttendance.setStatus(true);
                         gymAttendance.setDoy(doy);
                         gymAttendance.setUserid(user_id);
+                        gymAttendance.setDatedoy(date);
                         GymAttendance gymAttendanceNew = gymAttendanceService.save(gymAttendance);
                         if(gymAttendanceNew!=null) {
 
+                            int recentactivity =gymUsersService.updateRecentActivity(user_id);
+                            System.out.println("user_id : "+user_id+" : recentactivity is :"+recentactivity);
                             attendanceid = gymAttendanceNew.getId();
                             statusDesc = "Attendance added success";
                             status = true;
@@ -394,8 +397,10 @@ public class GymOwnerController {
 
         Boolean status = false;
         String statusDesc = "Failed";
+        String fromdate = "";
+        String toDate = "";
 
-        HashMap<String ,String> attHash = new HashMap<>();
+        LinkedHashMap<String ,String> attHash = new LinkedHashMap<>();
         JSONObject res = new JSONObject();
         JSONObject AttJson = new JSONObject();
         JSONArray doyJson = new JSONArray();
@@ -423,18 +428,38 @@ public class GymOwnerController {
                     LocalDate dateTo = LocalDate.parse(to);
                     doyFrom = dateString.getDayOfYear();
                     doyTo = dateTo.getDayOfYear();
+                    toDate = to;
+                    fromdate = from;
+                   // toDate = dateTo.getYear()+"-"+dateTo.getMonthValue()+"-"+dateTo.getDayOfMonth();
+                    //fromdate = dateString.getYear()+"-"+dateString.getMonthValue()+"-"+dateString.getDayOfMonth();
                 }else{
 
                     Calendar c = Calendar.getInstance();
                     Calendar cend = Calendar.getInstance();
                     doyTo = c.get(Calendar.DAY_OF_YEAR);
-                    cend.roll(Calendar.DAY_OF_YEAR, -30);
+                    cend.roll(Calendar.DAY_OF_YEAR, -15);
 //if within the first 30 days, need to roll the year as well
                     if(cend.after(c)){
                         cend.roll(Calendar.YEAR, -1);
                     }
                     doyFrom = cend.get(Calendar.DAY_OF_YEAR);
 
+                    int fMonth = cend.get(Calendar.MONTH)+1;
+                    int tMonth = c.get(Calendar.MONTH)+1;
+                    int fDay = cend.get(Calendar.DAY_OF_MONTH);
+                    int tDay = c.get(Calendar.DAY_OF_MONTH);
+
+                    String fromM = "";
+                    String toM = "";
+                    String fromDate = "";
+                    String toDate2 = "";
+                    if(fMonth<10) {fromM="0"+fMonth; }else {fromM=String.valueOf(fMonth);};
+                    if(tMonth<10) {toM="0"+tMonth; }else {toM=String.valueOf(tMonth);};
+                    if(fDay<10) {fromDate="0"+fDay; }else {fromDate=String.valueOf(fDay);};
+                    if(tDay<10) {toDate2="0"+tDay; }else {toDate2=String.valueOf(tDay);};
+
+                    fromdate = cend.get(Calendar.YEAR)+"-"+fromM+"-"+fromDate;
+                    toDate = c.get(Calendar.YEAR)+"-"+toM+"-"+toDate2;
 
                 }
 
@@ -445,13 +470,29 @@ public class GymOwnerController {
             if(doyFrom!=0 && doyTo!=0) {
 
 
-                for(int i=doyFrom;i<=doyTo;i++) {
+                /*for(int i=doyFrom;i<=doyTo;i++) {
 
                     int dayOfYear = i ;
                     Year y = Year.of( Year.now().getValue());
                     LocalDate ld = y.atDay( dayOfYear ) ;
                     DateTimeFormatter dateformatter
-                            = DateTimeFormatter.ofPattern("dd");
+                            = DateTimeFormatter.ofPattern("dd/MM/yy");
+                    // display the date
+                    String date_obj = (dateformatter.format(ld));
+                    JSONObject doyJsonObj = new JSONObject();
+                    doyJsonObj.put("doy",i);
+                    doyJsonObj.put("date",date_obj);
+                    doyJson.put(doyJsonObj);
+
+                }*/
+
+                for(int i=doyTo;i>=doyFrom;i--) {
+
+                    int dayOfYear = i ;
+                    Year y = Year.of( Year.now().getValue());
+                    LocalDate ld = y.atDay( dayOfYear ) ;
+                    DateTimeFormatter dateformatter
+                            = DateTimeFormatter.ofPattern("dd/MM/yy");
                     // display the date
                     String date_obj = (dateformatter.format(ld));
                     JSONObject doyJsonObj = new JSONObject();
@@ -477,6 +518,7 @@ public class GymOwnerController {
                             AttItem.put("userid", (userId));
                             AttItem.put("name", (userName));
                             AttItem.put("doy", ((attendance.get("doy") == null) ? "" : attendance.get("doy")));
+                            AttItem.put("datedoy", ((attendance.get("datedoy") == null) ? "" : attendance.get("datedoy")));
                             attJSONArray.put(AttItem);
 
                             if(attHash.get(userId)==null) {
@@ -538,6 +580,8 @@ public class GymOwnerController {
             res.put("attendance",attJSONArray);
             res.put("doyJson",doyJson);
             res.put("custJson",custJson);
+            res.put("fromdate",fromdate);
+            res.put("toDate",toDate);
 
         }
         return res.toString();
@@ -1147,6 +1191,7 @@ public class GymOwnerController {
             gymUsers.setUpdatedby(0);
             gymUsers.setApplog(false);
             gymUsers.setWeblog(false);
+            gymUsers.setRecentactivity(0);
             GymUsers owner = gymUsersService.findUserExist(gymUsers);
             GymUsers gymUsers1 = new GymUsers();
             if (owner == null){

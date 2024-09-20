@@ -59,6 +59,9 @@ public class GymUsersService {
     public Integer regToken(String phone,String password) {
 
         return  gymUsersRepo.regToken(phone,password);
+    }public Integer updateRecentActivity(int userid) {
+
+        return  gymUsersRepo.updateRecentActivity(userid);
     }
 
 }

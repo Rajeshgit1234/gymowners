@@ -12,7 +12,8 @@ import java.sql.Timestamp;
 public class GymUserPayments {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "gym_user_payments_generator")
+    @SequenceGenerator(name = "gym_user_payments_generator", sequenceName = "gym_user_payments_seq", allocationSize = 1)
     private int id;
     private int gym;
     private int customer;

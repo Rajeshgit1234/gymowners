@@ -12,7 +12,8 @@ import java.sql.Timestamp;
 public class GymUsers {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "gym_users_generator")
+    @SequenceGenerator(name = "gym_users_generator", sequenceName = "gym_users_seq", allocationSize = 1)
     private int id;
 
     private int gym;
@@ -34,6 +35,7 @@ public class GymUsers {
     private int profile;
     private int addedby;
     private int updatedby;
+    private int recentactivity;
     private String phone;
     private String email;
     private String uniquetoken;
@@ -42,7 +44,7 @@ public class GymUsers {
     private Boolean applog;
 
 
-    public GymUsers(int id, int gym, String name, String username, String password, String address, Timestamp created, Timestamp updated, int profile, int addedby, int updatedby, String phone, String email, String uniquetoken, Boolean active, Boolean weblog, Boolean applog) {
+    public GymUsers(int id, int gym, String name, String username, String password, String address, Timestamp created, Timestamp updated, int profile, int addedby, int updatedby, int recentactivity, String phone, String email, String uniquetoken, Boolean active, Boolean weblog, Boolean applog) {
         this.id = id;
         this.gym = gym;
         this.name = name;
@@ -54,6 +56,7 @@ public class GymUsers {
         this.profile = profile;
         this.addedby = addedby;
         this.updatedby = updatedby;
+        this.recentactivity = recentactivity;
         this.phone = phone;
         this.email = email;
         this.uniquetoken = uniquetoken;
@@ -65,7 +68,6 @@ public class GymUsers {
     public GymUsers() {
 
     }
-
 
     public int getId() {
         return id;
@@ -153,6 +155,14 @@ public class GymUsers {
 
     public void setUpdatedby(int updatedby) {
         this.updatedby = updatedby;
+    }
+
+    public int getRecentactivity() {
+        return recentactivity;
+    }
+
+    public void setRecentactivity(int recentactivity) {
+        this.recentactivity = recentactivity;
     }
 
     public String getPhone() {

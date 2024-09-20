@@ -1,16 +1,14 @@
 package com.gym.owner.DB;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 
 import java.sql.Timestamp;
 @Entity
 public class GymExpenseListQuery {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "gym_expense_list_query_generator")
+    @SequenceGenerator(name = "gym_expense_list_query_generator", sequenceName = "gym_expense_list_query_seq", allocationSize = 1)
     private int id;
     private String name;
     private Timestamp created_on;

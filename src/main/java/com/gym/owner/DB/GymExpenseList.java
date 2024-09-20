@@ -111,7 +111,8 @@ public class GymExpenseList {
     }
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "gym_expense_list_generator")
+    @SequenceGenerator(name = "gym_expense_list_generator", sequenceName = "gym_expense_list_seq", allocationSize = 1)
     private int id;
     private int exp_id;
     private String  exp_remarks;

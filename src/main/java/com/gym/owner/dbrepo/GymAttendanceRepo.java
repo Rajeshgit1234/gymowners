@@ -31,7 +31,7 @@ public interface GymAttendanceRepo extends JpaRepository<GymAttendance, Integer>
 
 
 
-    @Query("select  lttable.id as userid,lttable.name as name,att.doy as doy from  (SELECT u.id as id,u.name as name FROM GymUsers u WHERE u.gym=:gymId and u.profile=:profile and u.active=true  order by u.id LIMIT 20  OFFSET :offset) as lttable left  join GymAttendance  att on lttable.id=att.userid and att.doy between :doy and :doyend ")
+    @Query("select  lttable.id as userid,lttable.name as name,att.doy as doy,att.datedoy as datedoy from  (SELECT u.id as id,u.name as name FROM GymUsers u WHERE u.gym=:gymId and u.profile=:profile and u.active=true  order by u.recentactivity desc LIMIT 10  OFFSET :offset) as lttable left  join GymAttendance  att on lttable.id=att.userid and att.doy between :doy and :doyend ")
     public List<Map<String, Object>> fetchGymAttendance(@Param("gymId") int gymId,@Param("profile") int profile,@Param("doy") int doy, @Param("doyend") int doyend, @Param("offset") int offset);
 
 

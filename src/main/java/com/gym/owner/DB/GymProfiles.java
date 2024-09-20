@@ -11,7 +11,8 @@ import java.sql.Timestamp;
 public class GymProfiles {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "gym_profiles_generator")
+    @SequenceGenerator(name = "gym_profiles_generator", sequenceName = "gym_profiles_seq", allocationSize = 1)
     private int id;
 
 

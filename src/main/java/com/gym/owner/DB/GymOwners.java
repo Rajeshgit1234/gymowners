@@ -12,7 +12,8 @@ public class GymOwners {
 
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "gym_owner_generator")
+    @SequenceGenerator(name = "gym_owner_generator", sequenceName = "gym_owner_seq", allocationSize = 1)
     private int id;
     private int gymid;
     private int owner;

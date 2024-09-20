@@ -12,7 +12,8 @@ import java.sql.Timestamp;
 public class GymList {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "gym_list_generator")
+    @SequenceGenerator(name = "gym_list_generator", sequenceName = "gym_list_seq", allocationSize = 1)
     private int id;
     private int created_by;
     private String name;
