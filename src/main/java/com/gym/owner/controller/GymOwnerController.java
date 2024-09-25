@@ -26,6 +26,9 @@ public class GymOwnerController {
     private ExpenseMasterService expenseMasterService;
 
     @Autowired
+    private GymSubscriptionPlansService gymSubscriptionPlansService;
+
+    @Autowired
     private GymExpenseListService gymExpenseListService;
 
     @Autowired
@@ -278,7 +281,7 @@ public class GymOwnerController {
                             int recentactivity =gymUsersService.updateRecentActivity(user_id);
                             System.out.println("user_id : "+user_id+" : recentactivity is :"+recentactivity);
                             attendanceid = gymAttendanceNew.getId();
-                            statusDesc = "Attendance added success";
+                            statusDesc = "Attendance added successfully";
                             status = true;
                         }else{
 
@@ -777,6 +780,7 @@ public class GymOwnerController {
         JSONObject gymuser_Json = new JSONObject();
         JSONArray expenseMasterList =new JSONArray();
         JSONArray profileMasterList =new JSONArray();
+        JSONArray subscriptionplans =new JSONArray();
         JSONArray gymList =new JSONArray();
 
         int gym_id =0;
@@ -811,6 +815,7 @@ public class GymOwnerController {
             gymuser_Json.put("email", owner.get().getEmail());
 
             List<ExpenseMaster> expenseMaster= expenseMasterService.findActiveExpenseMaster(gym_id);
+            List<GymSubscriptionPlans> subscription= gymSubscriptionPlansService.getPlansFull(gym_id);
             // List<GymExpenseListQuery> expenseList= gymExpenseListService.getGymExpenseListQuery(gym_id);
 
             if(!expenseMaster.isEmpty()){
@@ -820,6 +825,18 @@ public class GymOwnerController {
                     expenseJson.put("expId",expense.getId());
                     expenseJson.put("expItem",expense.getExpense_item());
                     expenseMasterList.put(expenseJson);
+                }
+
+            }
+
+            if(!subscription.isEmpty()){
+
+                for(GymSubscriptionPlans item:subscription){
+                    JSONObject sub = new JSONObject();
+                    sub.put("subId",item.getId());
+                    sub.put("subName",item.getDescription());
+                    sub.put("subAmount",item.getAmount());
+                    subscriptionplans.put(sub);
                 }
 
             }
@@ -882,6 +899,7 @@ public class GymOwnerController {
             res.put("expenseMasterList",expenseMasterList );
             res.put("gymList",gymList );
             res.put("profileMasterList",profileMasterList );
+            res.put("subscriptionplans",subscriptionplans );
         }
         return res.toString();
 
@@ -965,6 +983,133 @@ public class GymOwnerController {
             res.put("status",status);
             res.put("statusDesc",statusDesc);
             res.put("expenseList",expenseJson );
+        }
+        return res.toString();
+
+
+
+    }
+
+    @CrossOrigin
+    @PostMapping("/addSubscriptions")
+    public String addSubscriptions(@RequestBody String jsonReq) {
+
+        Boolean status = false;
+        String statusDesc = "Failed";
+        JSONArray expenseJson =new JSONArray();
+        DecimalFormat formatter
+                = new DecimalFormat("₹#,##0.00");
+        JSONObject res = new JSONObject();
+        int subscriptionid = 0;
+
+        try{
+            System.out.println("gymOwnerService --> addExpense "+jsonReq);
+            JSONObject req = new JSONObject(jsonReq);
+            String subscriptiontext = Common.inputStringParaNullCheck(req,"subscriptiontext");
+            int gym = Common.inputIntParaNullCheck(req,"gym");
+            int user = Common.inputIntParaNullCheck(req,"user");
+            int amount = Common.inputIntParaNullCheck(req,"amount");
+
+
+            GymSubscriptionPlans gymSubscriptionPlans   = new  GymSubscriptionPlans();
+
+            gymSubscriptionPlans.setGym(gym);
+            gymSubscriptionPlans.setAmount(amount);
+            gymSubscriptionPlans.setAdded(user);
+            gymSubscriptionPlans.setUpdated(user);
+            gymSubscriptionPlans.setStatus(true);
+            gymSubscriptionPlans.setDescription(subscriptiontext);
+
+            if(gymSubscriptionPlansService.checkIfExist(gymSubscriptionPlans)==null){
+
+                GymSubscriptionPlans gymSubscriptionPlans1 = gymSubscriptionPlansService.save(gymSubscriptionPlans);
+                if(gymSubscriptionPlans1!=null){
+                    System.out.println("gymExpenseListService :: "+gymSubscriptionPlans1.getId());
+                    subscriptionid = gymSubscriptionPlans1.getId();
+                    statusDesc = "Subscription added successfully";
+                    status = true;
+                }else{
+
+                    statusDesc = "Operation failed";
+                }
+            }else{
+                statusDesc = "Subscription already exists";
+            }
+
+
+
+
+        }catch(Exception e){ e.printStackTrace();}finally {
+            res.put("status",status);
+            res.put("statusDesc",statusDesc);
+            res.put("subscriptionid",subscriptionid );
+        }
+        return res.toString();
+
+
+
+    }
+
+    @CrossOrigin
+    @PostMapping("/fetchSubscriptionPlans")
+    public String fetchSubscriptionPlans(@RequestBody String jsonReq) {
+
+        Boolean status = false;
+        String statusDesc = "Failed";
+        JSONArray subscriptionPlans =new JSONArray();
+
+        JSONObject res = new JSONObject();
+        int subscriptionid = 0;
+
+        try{
+            System.out.println("gymOwnerService --> addExpense "+jsonReq);
+            JSONObject req = new JSONObject(jsonReq);
+            int gym = Common.inputIntParaNullCheck(req,"gym");
+            int offset = Common.inputIntParaNullCheck(req,"offset");
+
+
+            if(gym!=0){
+
+                List<Map<String, Object>> subscriptionPlanList= gymSubscriptionPlansService.getPlans(gym,offset);
+                if (!subscriptionPlanList.isEmpty()) {
+
+                    /*for (GymSubscriptionPlans plans : subscriptionPlanList) {
+
+                        JSONObject plan = new JSONObject();
+                        plan.put("subId", plans.getId());
+                        plan.put("subName", plans.getDescription());
+                        plan.put("addedOn", plans.getCreatedon());
+                        plan.put("addedBy", plans.getCreatedon());
+                        subscriptionPlans.put(plan);
+                    }*/
+
+                    for(Map<String, Object> plans:subscriptionPlanList) {
+                        String  subId = ((plans.get("subId") == null) ? "" : plans.get("subId").toString());
+                        String  subName = ((plans.get("subName") == null) ? "" : plans.get("subName").toString());
+                        String  addedOn = ((plans.get("addedOn") == null) ? "" : plans.get("addedOn").toString());
+                        String  addedBy = ((plans.get("addedBy") == null) ? "" : plans.get("addedBy").toString());
+                        JSONObject plan = new JSONObject();
+                        plan.put("subId", subId);
+                        plan.put("subName", subName);
+                        plan.put("addedOn", addedOn);
+                        plan.put("addedBy", addedBy);
+                        subscriptionPlans.put(plan);
+
+                    }
+                    statusDesc="Fetched Successfully";
+                    status = true;
+                }
+            }else{
+                statusDesc="Mandatory fields missing";
+            }
+
+
+
+
+        }catch(Exception e){ e.printStackTrace();}finally {
+            res.put("status",status);
+            res.put("statusDesc",statusDesc);
+            res.put("subscriptionPlans",subscriptionPlans );
         }
         return res.toString();
 
@@ -1065,6 +1210,67 @@ public class GymOwnerController {
             }else{
 
                 statusDesc = "Wrong user";
+            }
+
+
+
+
+
+
+
+
+        }catch(Exception e){ e.printStackTrace();}finally {
+            res.put("status",status);
+            res.put("statusDesc",statusDesc);
+            res.put("count",count );
+        }
+        return res.toString();
+
+
+
+    }
+    @CrossOrigin
+    @PostMapping("/delSubscriptionPlan")
+    public String delSubscriptionPlan(@RequestBody String jsonReq) {
+
+        Boolean status = false;
+        String statusDesc = "Failed";
+        int count =0;
+
+        JSONObject res = new JSONObject();
+
+        try{
+            System.out.println("gymOwnerService --> addExpense "+jsonReq);
+            JSONObject req = new JSONObject(jsonReq);
+
+
+
+            int gym = Common.inputIntParaNullCheck(req,"gym");
+            int subId = Common.inputIntParaNullCheck(req,"subId");
+
+
+            if(subId!=0) {
+                List<GymSubscriptionPlans> subscription = gymSubscriptionPlansService.getPlansFullById(gym,subId);
+                if(subscription!=null && subscription.size()>0){
+
+
+                    int delFalg = gymSubscriptionPlansService.delSubscription(subId);
+                    if(delFalg!=0){
+
+                        statusDesc = "Subscription deleted successfully";
+                        status = true;
+                    }else{
+                        statusDesc = "Operation failed";
+                    }
+                }else{
+                    statusDesc = "Wrong Subscription plan";
+                }
+
+
+
+            }else{
+
+                statusDesc = "Wrong id";
             }
 
 
@@ -1900,6 +2106,67 @@ public class GymOwnerController {
 
 
     }
+    @CrossOrigin
+    @PostMapping("/loadGymCustomersFull")
+
+    public String loadGymCustomersFull(@RequestBody String jsonReq) {
+
+        Boolean status = false;
+        String statusDesc = "Failed";
+
+
+        JSONArray profile =new JSONArray();
+
+        JSONObject res = new JSONObject();
+        try{
+            System.out.println("gymOwnerService --> loadProfile "+jsonReq);
+            JSONObject req = new JSONObject(jsonReq);
+            /*String gym_id_str = req.get("gym_id").toString();
+            int gym_id = Integer.valueOf(gym_id_str);*/
+            int gym_id = Common.inputIntParaNullCheck(req,"gym_id");
+
+            List<Map<String, Object>> gymUsersList = null;
+
+            gymUsersList = gymUsersService.findFullCustomers(gym_id, Common.GYM_CUSTOMERS);
+
+            if(!gymUsersList.isEmpty()){
+
+                for(Map<String, Object> gymUsers:gymUsersList){
+
+                    JSONObject profileEnt = new JSONObject();
+                    profileEnt.put("customer",gymUsers.get("username"));
+                    profileEnt.put("name",gymUsers.get("name"));
+                    profileEnt.put("phone",gymUsers.get("phone"));
+                    profileEnt.put("id",gymUsers.get("id"));
+                    profileEnt.put("addedby",gymUsers.get("added"));
+                    profileEnt.put("addedOn",gymUsers.get("created"));
+
+                   /* profileEnt.put("username",gymUsersList.get().getUsername());
+                    profileEnt.put("name",gymUsersList.get().getName());
+                    profileEnt.put("phone",gymUsersList.get().getPhone());
+                    profileEnt.put("id",gymUsersList.get().getId());
+                    profileEnt.put("addedby",gymUsersList.get().getAddedby());
+                    profileEnt.put("addedOn",gymUsersList.get().getCreated().toString());*/
+                    profile.put(profileEnt);
+
+                }
+
+            }
+            statusDesc = "Data fetched";
+            status=true;
+
+
+        }catch(Exception e){ e.printStackTrace();}finally {
+            res.put("status",status);
+            res.put("statusDesc",statusDesc);
+            res.put("profile",profile );
+        }
+
+        return res.toString();
+
+
+
+    }
 
     @CrossOrigin
     @PostMapping("/loadGymMembers")
@@ -2148,7 +2415,7 @@ public class GymOwnerController {
             int addedby = Common.inputIntParaNullCheck(req,"addedby");
             float amount = Common.inputFloatParaNullCheck(req,"amount");
             String description = Common.inputStringParaNullCheck(req,"description");
-            String subscription = Common.inputStringParaNullCheck(req,"subscription");
+            int subscription = Common.inputIntParaNullCheck(req,"subscription");
 
             boolean sameyear = true;
             boolean diffMonth = true;

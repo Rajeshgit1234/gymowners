@@ -28,6 +28,9 @@ public interface GymUsersRepo extends JpaRepository<GymUsers, Integer> {
     @Query("SELECT u.id as id,u.name as name,u.username as username,u.phone as phone,u.created as created,users.name as added ,u.address as address FROM GymUsers  u,GymUsers  users WHERE u.gym in( :gym ) and u.profile = :profile and u.active=true and u.addedby=users.id  order by u.id desc LIMIT 10 OFFSET :offset")
     public List<Map<String, Object>>  findByActiveAndProfileAndGym( @Param("profile")int profile, @Param("gym")int gym, @Param("offset")int offset);
 
+    @Query("SELECT u.id as id,u.name as name,u.username as username,u.phone as phone,u.created as created,users.name as added ,u.address as address FROM GymUsers  u,GymUsers  users WHERE u.gym in( :gym ) and u.profile = :profile and u.active=true and u.addedby=users.id  order by u.id desc ")
+    public List<Map<String, Object>>  findByActiveAndProfileAndGymFull( @Param("profile")int profile, @Param("gym")int gym);
+
     @Query("SELECT u.id as id,u.name as name,u.username as username,u.phone as phone,u.created as created,users.name as added ,u.address as address FROM GymUsers  u,GymUsers  users WHERE u.gym in( :gym ) and u.phone = :phone and u.active=true and u.addedby=users.id  order by u.id desc LIMIT 10 OFFSET :offset")
     public List<Map<String, Object>>  findCustomersWithPhone(  @Param("gym")int gym, @Param("offset")int offset, @Param("phone")String phone);
 

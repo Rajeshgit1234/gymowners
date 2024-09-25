@@ -31,9 +31,9 @@ public class GymUserPayments {
     private Timestamp updatedon;
     private String description;
     private boolean status;
-    private String subscription;
+    private int subscription;
 
-    public GymUserPayments(int id, int gym, int customer, int addedby, int updatedby, int paymonth, int payyear, float amount, Timestamp createdon, Timestamp updatedon, String description, boolean status, String subscription) {
+    public GymUserPayments(int id, int gym, int customer, int addedby, int updatedby, int paymonth, int payyear, float amount, Timestamp createdon, Timestamp updatedon, String description, boolean status, int subscription) {
         this.id = id;
         this.gym = gym;
         this.customer = customer;
@@ -149,11 +149,11 @@ public class GymUserPayments {
         this.status = status;
     }
 
-    public String getSubscription() {
+    public int getSubscription() {
         return subscription;
     }
 
-    public void setSubscription(String subscription) {
+    public void setSubscription(int subscription) {
         this.subscription = subscription;
     }
 }

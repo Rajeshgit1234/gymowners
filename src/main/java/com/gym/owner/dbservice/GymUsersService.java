@@ -28,6 +28,10 @@ public class GymUsersService {
 
         return gymUsersRepo.findByActiveAndProfileAndGym( profile_id,gym_id,offset);
     }
+    public List<Map<String, Object>> findFullCustomers(int gym_id, int profile_id){
+
+        return gymUsersRepo.findByActiveAndProfileAndGymFull( profile_id,gym_id);
+    }
     public List<Map<String, Object>> findCustomersWithPhone(int gym_id,int offset,String phone){
 
         return gymUsersRepo.findCustomersWithPhone( gym_id,offset,phone);
