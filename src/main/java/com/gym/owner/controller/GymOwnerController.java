@@ -784,9 +784,11 @@ public class GymOwnerController {
         JSONArray expenseMasterList =new JSONArray();
         JSONArray profileMasterList =new JSONArray();
         JSONArray subscriptionplans =new JSONArray();
+        JSONArray paymentsList =new JSONArray();
         JSONArray expData =new JSONArray();
         JSONArray gymList =new JSONArray();
         Hashtable<String,Float > expTable = new Hashtable<String,Float>();
+        Hashtable<String,Float > payTable = new Hashtable<String,Float>();
 
         int gym_id =0;
         int user_id =0;
@@ -813,6 +815,7 @@ public class GymOwnerController {
 
             List<Map<String, Object>> expenseList= gymExpenseListService.getExpenseSumMonth(gym_id,new Timestamp(DATE_TIME_FORMAT.parse(todaydate.withDayOfMonth(1).toString()).getTime()));
             List<Map<String, Object>> payList= gymUserPaymentsService.getPaySumMonth(gym_id,year,month);
+            List<Map<String, Object>> payFullList= gymUserPaymentsService.getGymPaymentsFilterMonth(gym_id,year,month);
             System.out.println("Months first date in yyyy-mm-dd: " +todaydate.withDayOfMonth(1));
             List<GymProfiles> gymProfiles =  gymProfilesService.findAllProfiles();
 
@@ -895,6 +898,44 @@ public class GymOwnerController {
 
             }
 
+            if(!payFullList.isEmpty()){
+
+                for(Map<String, Object> pay:payFullList){
+                    if(pay!=null) {
+                        JSONObject payItem = new JSONObject();
+                        Object amount = ((pay.get("amount") == null) ? "0.00" : pay.get("amount"));
+                        String date_str = ((pay.get("createdon") == null) ? "0.00" : pay.get("createdon")).toString();
+                        Float amt = Float.valueOf(amount.toString());
+
+                        if(payTable.get(date_str)==null){
+
+                            payTable.put(date_str,amt);
+
+                        }else{
+
+                            Float amount_added = payTable.get(date_str);
+                            amount_added= amount_added+amt;
+                            payTable.put(date_str,amount_added);
+
+                        }
+
+
+                    }
+
+                }
+
+                Set<String> keys = payTable.keySet();
+                for(String key: keys){
+                    Float amount = payTable.get(key);
+                    JSONObject payItem = new JSONObject();
+                    payItem.put("pay_date",key);
+                    payItem.put("pay_amount",amount);
+                    paymentsList.put(payItem);
+
+                }
+
+            }
+
             if(owner.get().getProfile()==Common.GYM_OWNERS){
 
                 List<GymOwners>  ownerGymList = gymOwnersService.getAllOwnerGymDetails(owner.get().getId());
@@ -967,7 +1008,10 @@ public class GymOwnerController {
             res.put("gymList",gymList );
             res.put("profileMasterList",profileMasterList );
             res.put("subscriptionplans",subscriptionplans );
+            res.put("payList",paymentsList );
             res.put("expData",expData );
+
+            System.out.println(res );
         }
         return res.toString();
 

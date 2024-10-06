@@ -32,6 +32,14 @@ public interface GymUserPaymentsRepo  extends JpaRepository<GymUserPayments, Int
             nativeQuery = true
     )
     List<Map<String, Object>> getGymPaymentsFilterMonthYear(@Param("gym") int gym, @Param("payyear") int payyear,@Param("paymonth") int paymonth,@Param("limit") int limit, @Param("offset") int offset);
+
+    @Query(
+            value = "SELECT sum(payments.amount) as amount,CAST(payments.createdon AS DATE)  as createdon FROM gym_user_payments payments,gym_users users  where users.id=payments.customer and  payments.gym=:gym and payments.status=true and payments.paymonth=:paymonth and payments.payyear=:payyear  group by  createdon",
+            nativeQuery = true
+    )
+    List<Map<String, Object>> getGymPaymentsMonth(@Param("gym") int gym, @Param("payyear") int payyear,@Param("paymonth") int paymonth);
+
+
     @Query(
             value = "SELECT sum(payments.amount) as amount FROM gym_user_payments payments,gym_users users  where users.id=payments.customer and  payments.gym=:gym and payments.status=true and payments.paymonth=:paymonth and payments.payyear=:payyear",
             nativeQuery = true
