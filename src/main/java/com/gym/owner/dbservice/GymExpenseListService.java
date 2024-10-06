@@ -61,4 +61,8 @@ public class GymExpenseListService {
 
         return  gymExpenseListRepo.getExpenseSumMonth(gym_id,str_date);
     }
+    public List<Map<String, Object>>  getExpenseChart(int gym_id, Timestamp str_date) {
+
+        return  gymExpenseListRepo.getExpenseChart(gym_id,str_date);
+    }
 }

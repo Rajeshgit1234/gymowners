@@ -17,6 +17,7 @@ public class GymUsers {
     private int id;
 
     private int gym;
+    private int pt;
 
     private String name;
 
@@ -36,6 +37,7 @@ public class GymUsers {
     private int addedby;
     private int updatedby;
     private int recentactivity;
+    private int subscription;
     private String phone;
     private String email;
     private String uniquetoken;
@@ -44,9 +46,11 @@ public class GymUsers {
     private Boolean applog;
 
 
-    public GymUsers(int id, int gym, String name, String username, String password, String address, Timestamp created, Timestamp updated, int profile, int addedby, int updatedby, int recentactivity, String phone, String email, String uniquetoken, Boolean active, Boolean weblog, Boolean applog) {
+
+    public GymUsers(int id, int gym, int pt, String name, String username, String password, String address, Timestamp created, Timestamp updated, int profile, int addedby, int updatedby, int recentactivity, int subscription, String phone, String email, String uniquetoken, Boolean active, Boolean weblog, Boolean applog) {
         this.id = id;
         this.gym = gym;
+        this.pt = pt;
         this.name = name;
         this.username = username;
         this.password = password;
@@ -57,6 +61,7 @@ public class GymUsers {
         this.addedby = addedby;
         this.updatedby = updatedby;
         this.recentactivity = recentactivity;
+        this.subscription = subscription;
         this.phone = phone;
         this.email = email;
         this.uniquetoken = uniquetoken;
@@ -83,6 +88,14 @@ public class GymUsers {
 
     public void setGym(int gym) {
         this.gym = gym;
+    }
+
+    public int getPt() {
+        return pt;
+    }
+
+    public void setPt(int pt) {
+        this.pt = pt;
     }
 
     public String getName() {
@@ -163,6 +176,14 @@ public class GymUsers {
 
     public void setRecentactivity(int recentactivity) {
         this.recentactivity = recentactivity;
+    }
+
+    public int getSubscription() {
+        return subscription;
+    }
+
+    public void setSubscription(int subscription) {
+        this.subscription = subscription;
     }
 
     public String getPhone() {

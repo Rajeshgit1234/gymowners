@@ -10,6 +10,7 @@ public class Common {
 
     public static final int GYM_CUSTOMERS= 253;//based on profile table id
     public static final int GYM_OWNERS= 252;
+    public static final int GYM_PT= 254;
     static int days [] = { 31, 28, 31, 30, 31, 30,
             31, 31, 30, 31, 30, 31 };
     public static final String WEB_LINK= "http://localhost:8080/WebAppGym/regvostro?tk=";

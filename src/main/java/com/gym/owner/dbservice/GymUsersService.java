@@ -32,6 +32,11 @@ public class GymUsersService {
 
         return gymUsersRepo.findByActiveAndProfileAndGymFull( profile_id,gym_id);
     }
+
+    public List<Map<String, Object>> findFullCustomersPT(int gym_id, int profile_id1,int profile_id2){
+
+        return gymUsersRepo.findByActiveAndProfilePTAndGymFull( profile_id1,profile_id2,gym_id);
+    }
     public List<Map<String, Object>> findCustomersWithPhone(int gym_id,int offset,String phone){
 
         return gymUsersRepo.findCustomersWithPhone( gym_id,offset,phone);
@@ -48,6 +53,12 @@ public class GymUsersService {
     public GymUsers saveUser(GymUsers gymUsers) {
 
         return  gymUsersRepo.save(gymUsers);
+    }public int mapPT(int gym_id,int customer, int ptuser,int userid) {
+
+        return  gymUsersRepo.mapPT(gym_id,customer,ptuser,userid);
+    }public int mapSub(int gym_id,int customer, int sub,int userid) {
+
+        return  gymUsersRepo.mapSub(gym_id,customer,sub,userid);
     }
     public GymUsers findUserExist(GymUsers gymUsers) {
 

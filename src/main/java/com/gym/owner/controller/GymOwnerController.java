@@ -51,6 +51,9 @@ public class GymOwnerController {
     @Autowired
     private GymAttendanceService gymAttendanceService;
 
+    @Autowired
+    private GymQueriesService gymQueriesService;
+
     @CrossOrigin
     @PostMapping("/weblogin")
     public String login(@RequestBody String jsonReq) {
@@ -781,11 +784,14 @@ public class GymOwnerController {
         JSONArray expenseMasterList =new JSONArray();
         JSONArray profileMasterList =new JSONArray();
         JSONArray subscriptionplans =new JSONArray();
+        JSONArray expData =new JSONArray();
         JSONArray gymList =new JSONArray();
+        Hashtable<String,Float > expTable = new Hashtable<String,Float>();
 
         int gym_id =0;
         int user_id =0;
         String  exp_total ="0";
+        String  pay_total ="0";
         JSONObject res = new JSONObject();
         DecimalFormat formatter
                 = new DecimalFormat("₹#,##0.00");
@@ -801,7 +807,12 @@ public class GymOwnerController {
             Optional<GymUsers> owner=  gymUsersService.findByUser_id(user_id);
             Optional<GymList> gym=  gymListService.findById(gym_id);
 
+            Calendar c = Calendar.getInstance();
+            int year = c.get(Calendar.YEAR);
+            int month = c.get(Calendar.MONTH)+1;
+
             List<Map<String, Object>> expenseList= gymExpenseListService.getExpenseSumMonth(gym_id,new Timestamp(DATE_TIME_FORMAT.parse(todaydate.withDayOfMonth(1).toString()).getTime()));
+            List<Map<String, Object>> payList= gymUserPaymentsService.getPaySumMonth(gym_id,year,month);
             System.out.println("Months first date in yyyy-mm-dd: " +todaydate.withDayOfMonth(1));
             List<GymProfiles> gymProfiles =  gymProfilesService.findAllProfiles();
 
@@ -867,6 +878,22 @@ public class GymOwnerController {
                 }
 
             }
+            if(!payList.isEmpty()){
+
+                for(Map<String, Object> pay:payList){
+                    if(pay!=null) {
+                        JSONObject expenseItem = new JSONObject();
+                        Object amount = ((pay.get("amount") == null) ? "0.00" : pay.get("amount"));
+                        Float amt = Float.valueOf(amount.toString());
+                       pay_total = formatter.format(amt);
+                    }else{
+                        pay_total = "0.00";
+                    }
+
+
+                }
+
+            }
 
             if(owner.get().getProfile()==Common.GYM_OWNERS){
 
@@ -889,17 +916,58 @@ public class GymOwnerController {
             }
 
 
+            List<Map<String, Object>> expenseListPie= gymExpenseListService.getExpenseChart(gym_id,new Timestamp(DATE_TIME_FORMAT.parse(todaydate.withDayOfMonth(1).toString()).getTime()));
+
+
+            if(!expenseListPie.isEmpty()) {
+
+                for (Map<String, Object> expense : expenseListPie) {
+                    JSONObject expenseItem = new JSONObject();
+                    String expitem = ((expense.get("expitem") == null) ? "" : expense.get("expitem")).toString();
+                    String amt = ((expense.get("amt") == null) ? "0" : expense.get("amt")).toString();
+                    //String currStr = formatter.format(amt);
+                    Float amount = Float.valueOf(amt);
+                    if (expTable.get(expitem) == null) {
+
+                        expTable.put(expitem, amount);
+                    } else {
+
+
+                        Float amount_sum = expTable.get(expitem);
+                        amount_sum = amount_sum + amount;
+                        expTable.put(expitem, amount_sum);
+                    }
+
+
+                }
+
+
+                Set<String> keys = expTable.keySet();
+                for (String key : keys) {
+                    Float amount = expTable.get(key);
+                    JSONObject expenseItem = new JSONObject();
+                    expenseItem.put("expItem", key);
+                    expenseItem.put("amount", amount);
+                    expData.put(expenseItem);
+
+                }
+            }
+
+
+
             status = true;
             statusDesc = "Success";
         }catch(Exception e){ e.printStackTrace();}finally {
             res.put("status",status);
             res.put("statusDesc",statusDesc);
             res.put("exp_total",exp_total);
+            res.put("pay_total",pay_total);
             res.put("gymuser",gymuser_Json );
             res.put("expenseMasterList",expenseMasterList );
             res.put("gymList",gymList );
             res.put("profileMasterList",profileMasterList );
             res.put("subscriptionplans",subscriptionplans );
+            res.put("expData",expData );
         }
         return res.toString();
 
@@ -1372,6 +1440,7 @@ public class GymOwnerController {
             String address = Common.inputStringParaNullCheck(req,"address");
             String phone = Common.inputStringParaNullCheck(req,"phone");
             String email = Common.inputStringParaNullCheck(req,"email");
+            int subscription = Common.inputIntParaNullCheck(req,"subscription");
 
 
             long uniqueIDL = System.currentTimeMillis();
@@ -1397,6 +1466,8 @@ public class GymOwnerController {
             gymUsers.setUpdatedby(0);
             gymUsers.setApplog(false);
             gymUsers.setWeblog(false);
+            gymUsers.setPt(0);
+            gymUsers.setSubscription(subscription);
             gymUsers.setRecentactivity(0);
             GymUsers owner = gymUsersService.findUserExist(gymUsers);
             GymUsers gymUsers1 = new GymUsers();
@@ -2167,6 +2238,192 @@ public class GymOwnerController {
 
 
     }
+    @CrossOrigin
+    @PostMapping("/mapPT")
+
+    public String mapPT(@RequestBody String jsonReq) {
+
+        Boolean status = false;
+        String statusDesc = "Failed";
+
+
+        int updated = 0;
+
+        JSONObject res = new JSONObject();
+        try{
+            System.out.println("gymOwnerService --> loadProfile "+jsonReq);
+            JSONObject req = new JSONObject(jsonReq);
+            /*String gym_id_str = req.get("gym_id").toString();
+            int gym_id = Integer.valueOf(gym_id_str);*/
+            int gym_id = Common.inputIntParaNullCheck(req,"gym_id");
+            int customer = Common.inputIntParaNullCheck(req,"customer");
+            int pt = Common.inputIntParaNullCheck(req,"pt");
+            int userid = Common.inputIntParaNullCheck(req,"userid");
+
+
+            Optional<GymUsers> customer_exist=  gymUsersService.findByUser_id(customer);
+
+            if(!customer_exist.isEmpty()){
+
+                 updated = gymUsersService.mapPT(gym_id,customer,pt,userid);
+                if(updated!=0){
+
+                    statusDesc ="Mapped Successfully";
+                    status=true;
+                }else{
+                    statusDesc ="Operation failed";
+                }
+
+
+            }else{
+                statusDesc = "Wrong user";
+            }
+
+
+
+
+        }catch(Exception e){ e.printStackTrace();}finally {
+            res.put("status",status);
+            res.put("statusDesc",statusDesc);
+        }
+
+        return res.toString();
+
+
+
+    }
+    @CrossOrigin
+    @PostMapping("/mapSubscription")
+
+    public String mapSubscription(@RequestBody String jsonReq) {
+
+        Boolean status = false;
+        String statusDesc = "Failed";
+
+
+        int updated = 0;
+
+        JSONObject res = new JSONObject();
+        try{
+            System.out.println("gymOwnerService --> loadProfile "+jsonReq);
+            JSONObject req = new JSONObject(jsonReq);
+            /*String gym_id_str = req.get("gym_id").toString();
+            int gym_id = Integer.valueOf(gym_id_str);*/
+            int gym_id = Common.inputIntParaNullCheck(req,"gym_id");
+            int customer = Common.inputIntParaNullCheck(req,"customer");
+            int sub = Common.inputIntParaNullCheck(req,"sub");
+            int userid = Common.inputIntParaNullCheck(req,"userid");
+
+
+            if(sub!=0 && customer!=0){
+
+                Optional<GymUsers> customer_exist=  gymUsersService.findByUser_id(customer);
+
+                if(!customer_exist.isEmpty()){
+
+                     updated = gymUsersService.mapSub(gym_id,customer,sub,userid);
+                    if(updated!=0){
+
+                        statusDesc ="Mapped Successfully";
+                        status=true;
+                    }else{
+                        statusDesc ="Operation failed";
+                    }
+
+
+                }else{
+                    statusDesc = "Wrong user";
+                }
+            }else{
+                statusDesc = "Mandatory fields are missing";
+            }
+
+
+
+
+        }catch(Exception e){ e.printStackTrace();}finally {
+            res.put("status",status);
+            res.put("statusDesc",statusDesc);
+        }
+
+        return res.toString();
+
+
+
+    }
+    @CrossOrigin
+    @PostMapping("/loadGymCustomersPTFull")
+
+    public String loadGymCustomersPTFull(@RequestBody String jsonReq) {
+
+        Boolean status = false;
+        String statusDesc = "Failed";
+
+
+        JSONArray profileCust =new JSONArray();
+        JSONArray profilePT =new JSONArray();
+
+        JSONObject res = new JSONObject();
+        try{
+            System.out.println("gymOwnerService --> loadProfile "+jsonReq);
+            JSONObject req = new JSONObject(jsonReq);
+            /*String gym_id_str = req.get("gym_id").toString();
+            int gym_id = Integer.valueOf(gym_id_str);*/
+            int gym_id = Common.inputIntParaNullCheck(req,"gym_id");
+
+            List<Map<String, Object>> gymUsersList = null;
+
+            gymUsersList = gymUsersService.findFullCustomersPT(gym_id, Common.GYM_CUSTOMERS,Common.GYM_PT);
+
+            if(!gymUsersList.isEmpty()){
+
+                for(Map<String, Object> gymUsers:gymUsersList){
+
+                    String profile_user = ((gymUsers.get("profile") == null) ? "" : gymUsers.get("profile")).toString();
+                    JSONObject profileEnt = new JSONObject();
+                    profileEnt.put("customer",gymUsers.get("username"));
+                    profileEnt.put("customer",((gymUsers.get("username") == null) ? "" : gymUsers.get("username")).toString());
+                    profileEnt.put("name",((gymUsers.get("name") == null) ? "" : gymUsers.get("name")).toString());
+                    profileEnt.put("phone",((gymUsers.get("phone") == null) ? "" : gymUsers.get("phone")).toString());
+                    profileEnt.put("id",((gymUsers.get("id") == null) ? "" : gymUsers.get("id")).toString());
+                    profileEnt.put("addedby",((gymUsers.get("addedby") == null) ? "" : gymUsers.get("addedby")).toString());
+                    profileEnt.put("addedOn",((gymUsers.get("addedOn") == null) ? "" : gymUsers.get("addedOn")).toString());
+                    profileEnt.put("profile_user",profile_user);
+
+                    if(profile_user.equalsIgnoreCase(String.valueOf(Common.GYM_CUSTOMERS))){
+
+
+
+
+                        profileCust.put(profileEnt);
+                    }else if(profile_user.equalsIgnoreCase(String.valueOf(Common.GYM_PT))){
+
+
+                        profilePT.put(profileEnt);
+                    }
+
+
+
+
+                }
+
+            }
+            statusDesc = "Data fetched";
+            status=true;
+
+
+        }catch(Exception e){ e.printStackTrace();}finally {
+            res.put("status",status);
+            res.put("statusDesc",statusDesc);
+            res.put("profileCust",profileCust );
+            res.put("profilePT",profilePT );
+        }
+
+        return res.toString();
+
+
+
+    }
 
     @CrossOrigin
     @PostMapping("/loadGymMembers")
@@ -2196,20 +2453,30 @@ public class GymOwnerController {
 
                 gymUsersList = gymUsersService.findCustomersWithPhone(gym_id, 0,phone);
             }else {
-                gymUsersList = gymUsersService.findCustomers(gym_id, Common.GYM_CUSTOMERS, offset);
+                gymUsersList = gymUsersService.findCustomers(gym_id, profile_id, offset);
             }
             if(!gymUsersList.isEmpty()){
 
                 for(Map<String, Object> gymUsers:gymUsersList){
 
                     JSONObject profileEnt = new JSONObject();
-                    profileEnt.put("username",gymUsers.get("username"));
+                    /*profileEnt.put("username",gymUsers.get("username"));
                     profileEnt.put("name",gymUsers.get("name"));
                     profileEnt.put("phone",gymUsers.get("phone"));
                     profileEnt.put("id",gymUsers.get("id"));
                     profileEnt.put("addedby",gymUsers.get("added"));
                     profileEnt.put("addedOn",gymUsers.get("created"));
-                    profileEnt.put("address",gymUsers.get("address"));
+                    profileEnt.put("address",gymUsers.get("address"));*/
+                    profileEnt.put("username",((gymUsers.get("username") == null) ? "" : gymUsers.get("username")).toString());
+                    profileEnt.put("name",((gymUsers.get("name") == null) ? "" : gymUsers.get("name")).toString());
+                    profileEnt.put("phone",((gymUsers.get("phone") == null) ? "" : gymUsers.get("phone")).toString());
+                    profileEnt.put("id",((gymUsers.get("id") == null) ? "" : gymUsers.get("id")).toString());
+                    profileEnt.put("addedby",((gymUsers.get("added") == null) ? "" : gymUsers.get("added")).toString());
+                    profileEnt.put("addedOn",((gymUsers.get("created") == null) ? "" : gymUsers.get("created")).toString());
+                    profileEnt.put("address",((gymUsers.get("address") == null) ? "Not Available" : gymUsers.get("address")).toString());
+                    profileEnt.put("subscription",((gymUsers.get("description") == null) ? "Not Added" : gymUsers.get("description")).toString());
+
+
 
                    /* profileEnt.put("username",gymUsersList.get().getUsername());
                     profileEnt.put("name",gymUsersList.get().getName());
@@ -2293,6 +2560,249 @@ public class GymOwnerController {
             res.put("status",status);
             res.put("statusDesc",statusDesc);
             res.put("payList",paymentsJson );
+        }
+
+        return res.toString();
+
+
+
+    }
+
+    @CrossOrigin
+    @PostMapping("/loadGymEnq")
+
+    public String loadGymEnq(@RequestBody String jsonReq) {
+
+        Boolean status = false;
+        String statusDesc = "Failed";
+        statusDesc = "Operation failed";
+
+        JSONArray enqJson =new JSONArray();
+
+        JSONObject res = new JSONObject();
+        try{
+            System.out.println("gymOwnerService --> addExpense "+jsonReq);
+            JSONObject req = new JSONObject(jsonReq);
+            /*String gym_id_str = req.get("gym_id").toString();
+            String offset_str = req.get("offset").toString();
+            int gym_id = Integer.valueOf(gym_id_str);
+            int offset = Integer.valueOf(offset_str);*/
+            int gym_id = Common.inputIntParaNullCheck(req,"gym_id");
+            int offset = Common.inputIntParaNullCheck(req,"offset");
+
+            List<Map<String, Object>> qryList= gymQueriesService.getQueries(gym_id,offset);
+
+            if(!qryList.isEmpty()){
+
+                for(Map<String, Object> qry:qryList){
+                    JSONObject enqItem = new JSONObject();
+
+                    enqItem.put("id",((qry.get("id") == null) ? "" : qry.get("id")).toString());
+                    enqItem.put("phone",((qry.get("phone") == null) ? "" : qry.get("phone")).toString());
+                    enqItem.put("query",((qry.get("query") == null) ? "" : qry.get("query")).toString());
+                    enqItem.put("added",((qry.get("added") == null) ? "" : qry.get("added")).toString());
+                    enqItem.put("addedOn",((qry.get("addedOn") == null) ? "" : qry.get("addedOn")).toString());
+
+
+
+
+
+
+                    enqJson.put(enqItem);
+                }
+
+            }
+            statusDesc = "Data fetched";
+            status=true;
+
+
+        }catch(Exception e){ e.printStackTrace();}finally {
+            res.put("status",status);
+            res.put("statusDesc",statusDesc);
+            res.put("enqJson",enqJson );
+        }
+
+        return res.toString();
+
+
+
+    }
+
+    @CrossOrigin
+    @PostMapping("/addGymEnq")
+
+    public String addGymEnq(@RequestBody String jsonReq) {
+
+        Boolean status = false;
+        String statusDesc = "Failed";
+        statusDesc = "Operation failed";
+
+        int queryId = 0;
+
+        JSONObject res = new JSONObject();
+        try{
+            System.out.println("gymOwnerService --> addExpense "+jsonReq);
+            JSONObject req = new JSONObject(jsonReq);
+
+            int gym_id = Common.inputIntParaNullCheck(req,"gym_id");
+            int phone = Common.inputIntParaNullCheck(req,"phone");
+            int added = Common.inputIntParaNullCheck(req,"added");
+            String query = Common.inputStringParaNullCheck(req,"query");
+
+            GymQueries queries  = new GymQueries();
+            queries.setQuery(query);
+            queries.setPhone(phone);
+            queries.setAdded(added);
+            queries.setStatus(true);
+            queries.setGymid(gym_id);
+
+
+            GymQueries newquery = gymQueriesService.save(queries);
+
+            if(newquery!=null){
+
+                queryId = newquery.getId();
+                statusDesc = "Data Added Successfully";
+                status=true;
+            }
+
+
+
+
+
+        }catch(Exception e){ e.printStackTrace();}finally {
+            res.put("status",status);
+            res.put("statusDesc",statusDesc);
+            res.put("queryId",queryId );
+        }
+
+        return res.toString();
+
+
+
+    }
+
+    @CrossOrigin
+    @PostMapping("/delGymEnq")
+
+    public String delGymEnq(@RequestBody String jsonReq) {
+
+        Boolean status = false;
+        String statusDesc = "Failed";
+        statusDesc = "Operation failed";
+
+        int queryId = 0;
+
+        JSONObject res = new JSONObject();
+        try{
+            System.out.println("gymOwnerService --> addExpense "+jsonReq);
+            JSONObject req = new JSONObject(jsonReq);
+
+            int qry_id = Common.inputIntParaNullCheck(req,"qry_id");
+            int user = Common.inputIntParaNullCheck(req,"user");
+
+            int del = gymQueriesService.disableQueries(qry_id,user);
+
+            if(del!=0){
+
+
+                statusDesc = "Data deleted Successfully";
+                status=true;
+            }else{
+                statusDesc = "Data not deleted";
+            }
+
+
+
+
+
+        }catch(Exception e){ e.printStackTrace();}finally {
+            res.put("status",status);
+            res.put("statusDesc",statusDesc);
+            res.put("queryId",queryId );
+        }
+
+        return res.toString();
+
+
+
+    }
+
+
+    @CrossOrigin
+    @PostMapping("/loadExpSpark")
+
+    public String loadExpSpark(@RequestBody String jsonReq) {
+
+        Boolean status = false;
+        String statusDesc = "Failed";
+        statusDesc = "Operation failed";
+
+        JSONArray expData = new JSONArray();
+        Hashtable<String,Float > expTable = new Hashtable<String,Float>();
+        DecimalFormat formatter
+                = new DecimalFormat("₹#,##0.00");
+        JSONObject res = new JSONObject();
+        try{
+            System.out.println("gymOwnerService --> addExpense "+jsonReq);
+            JSONObject req = new JSONObject(jsonReq);
+
+            int gym_id = Common.inputIntParaNullCheck(req,"gym_id");
+            LocalDate todaydate = LocalDate.now();
+
+
+            List<Map<String, Object>> expenseList= gymExpenseListService.getExpenseChart(gym_id,new Timestamp(DATE_TIME_FORMAT.parse(todaydate.withDayOfMonth(1).toString()).getTime()));
+
+
+            if(!expenseList.isEmpty()){
+
+                for(Map<String, Object> expense:expenseList) {
+                    JSONObject expenseItem = new JSONObject();
+                    String expitem = ((expense.get("expitem") == null) ? "" : expense.get("expitem")).toString();
+                    String amt = ((expense.get("amt") == null) ? "0" : expense.get("amt")).toString();
+                    //String currStr = formatter.format(amt);
+                    Float amount = Float.valueOf(amt);
+                    if(expTable.get(expitem)==null){
+
+                        expTable.put(expitem,amount);
+                    }else{
+
+
+                        Float amount_sum = expTable.get(expitem);
+                        amount_sum=amount_sum+amount;
+                        expTable.put(expitem,amount_sum);
+                    }
+
+
+                }
+
+
+                Set<String> keys = expTable.keySet();
+                for(String key: keys){
+                    Float amount = expTable.get(key);
+                    JSONObject expenseItem = new JSONObject();
+                    expenseItem.put("expItem",key);
+                    expenseItem.put("amount",amount);
+                    expData.put(expenseItem);
+
+                }
+
+                status = true;
+                statusDesc="Data fetched";
+
+            }else{
+
+                statusDesc="No data";
+            }
+
+
+
+
+
+        }catch(Exception e){ e.printStackTrace();}finally {
+            res.put("status",status);
+            res.put("statusDesc",statusDesc);
+            res.put("expData",expData );
         }
 
         return res.toString();
