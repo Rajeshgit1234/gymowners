@@ -24,6 +24,11 @@ public class GymUsersService {
 
         return  gymUsersRepo.findById(user_id);
     }
+
+    public List<GymUsers> findCustomerYetToAddDietPlan(Integer gym_id){
+
+        return  gymUsersRepo.findCustomerYetToAddDietPlan(gym_id);
+    }
     public List<Map<String, Object>> findCustomers(int gym_id, int profile_id,int offset){
 
         return gymUsersRepo.findByActiveAndProfileAndGym( profile_id,gym_id,offset);
@@ -59,6 +64,9 @@ public class GymUsersService {
     }public int mapSub(int gym_id,int customer, int sub,int userid) {
 
         return  gymUsersRepo.mapSub(gym_id,customer,sub,userid);
+    }public int mapDiet(int gym_id,int customer, int diet,int userid) {
+
+        return  gymUsersRepo.mapDiet(gym_id,customer,diet,userid);
     }
     public GymUsers findUserExist(GymUsers gymUsers) {
 

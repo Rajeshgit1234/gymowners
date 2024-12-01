@@ -38,16 +38,17 @@ public class GymUsers {
     private int updatedby;
     private int recentactivity;
     private int subscription;
+    private int dietplan;
     private String phone;
     private String email;
     private String uniquetoken;
     private Boolean active;
     private Boolean weblog;
     private Boolean applog;
+    private Boolean diet;
 
 
-
-    public GymUsers(int id, int gym, int pt, String name, String username, String password, String address, Timestamp created, Timestamp updated, int profile, int addedby, int updatedby, int recentactivity, int subscription, String phone, String email, String uniquetoken, Boolean active, Boolean weblog, Boolean applog) {
+    public GymUsers(int id, int gym, int pt, String name, String username, String password, String address, Timestamp created, Timestamp updated, int profile, int addedby, int updatedby, int recentactivity, int subscription, int dietplan, String phone, String email, String uniquetoken, Boolean active, Boolean weblog, Boolean applog, Boolean diet) {
         this.id = id;
         this.gym = gym;
         this.pt = pt;
@@ -62,12 +63,14 @@ public class GymUsers {
         this.updatedby = updatedby;
         this.recentactivity = recentactivity;
         this.subscription = subscription;
+        this.dietplan = dietplan;
         this.phone = phone;
         this.email = email;
         this.uniquetoken = uniquetoken;
         this.active = active;
         this.weblog = weblog;
         this.applog = applog;
+        this.diet = diet;
     }
 
     public GymUsers() {
@@ -186,6 +189,14 @@ public class GymUsers {
         this.subscription = subscription;
     }
 
+    public int getDietplan() {
+        return dietplan;
+    }
+
+    public void setDietplan(int dietplan) {
+        this.dietplan = dietplan;
+    }
+
     public String getPhone() {
         return phone;
     }
@@ -232,5 +243,13 @@ public class GymUsers {
 
     public void setApplog(Boolean applog) {
         this.applog = applog;
+    }
+
+    public Boolean getDiet() {
+        return diet;
+    }
+
+    public void setDiet(Boolean diet) {
+        this.diet = diet;
     }
 }

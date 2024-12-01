@@ -20,6 +20,7 @@ public class GymSubscriptionPlans {
     private int amount;
     private int added;
     private int updated;
+    private int duration;
     @CreationTimestamp
     private Timestamp createdon;
     @UpdateTimestamp
@@ -27,13 +28,14 @@ public class GymSubscriptionPlans {
     private Boolean status;
 
 
-    public GymSubscriptionPlans(int id, int gym, String description, int amount, int added, int updated, Timestamp createdon, Timestamp updatedon, Boolean status) {
+    public GymSubscriptionPlans(int id, int gym, String description, int amount, int added, int updated, int duration, Timestamp createdon, Timestamp updatedon, Boolean status) {
         this.id = id;
         this.gym = gym;
         this.description = description;
         this.amount = amount;
         this.added = added;
         this.updated = updated;
+        this.duration = duration;
         this.createdon = createdon;
         this.updatedon = updatedon;
         this.status = status;
@@ -89,6 +91,14 @@ public class GymSubscriptionPlans {
 
     public void setUpdated(int updated) {
         this.updated = updated;
+    }
+
+    public int getDuration() {
+        return duration;
+    }
+
+    public void setDuration(int duration) {
+        this.duration = duration;
     }
 
     public Timestamp getCreatedon() {

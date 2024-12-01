@@ -14,4 +14,6 @@ public interface GymProfilesRepo extends JpaRepository<GymProfiles, Integer> {
     @Query("SELECT u.id,u.gym_id,u.created_at,u.profile_name,u.status,u.updated_at as amount FROM GymProfiles u WHERE  u.status=true and UPPER(u.profile_name) = :name and u.gym_id in (0,:gym_id)  ")
 
     public List<Map<String, Object>> findGymProfilesByName(String name, Integer gym_id);
+
+
 }

@@ -8,9 +8,9 @@ import java.util.List;
 
 public class Common {
 
-    public static final int GYM_CUSTOMERS= 253;//based on profile table id
-    public static final int GYM_OWNERS= 252;
-    public static final int GYM_PT= 254;
+    public static final int GYM_CUSTOMERS= 5;//based on profile table id
+    public static final int GYM_OWNERS= 2;
+    public static final int GYM_PT= 4;
     static int days [] = { 31, 28, 31, 30, 31, 30,
             31, 31, 30, 31, 30, 31 };
     public static final String WEB_LINK= "http://localhost:8080/WebAppGym/regvostro?tk=";
@@ -51,8 +51,12 @@ public class Common {
             if(req.get(value) == null ){
                 res = 0;
             }else{
-                String str_val =  req.get(value).toString();
-                res =  Integer.parseInt(str_val);
+                if(req.get(value).toString().length() == 0){
+                    res = 0;
+                }else {
+                    String str_val = req.get(value).toString();
+                    res = Integer.parseInt(str_val);
+                }
             }
         }catch (Exception e){
             e.printStackTrace();

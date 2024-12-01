@@ -54,6 +54,9 @@ public class GymOwnerController {
     @Autowired
     private GymQueriesService gymQueriesService;
 
+    @Autowired
+    private GymDietPlansService gymDietPlansService;
+
     @CrossOrigin
     @PostMapping("/weblogin")
     public String login(@RequestBody String jsonReq) {
@@ -1121,6 +1124,7 @@ public class GymOwnerController {
             int gym = Common.inputIntParaNullCheck(req,"gym");
             int user = Common.inputIntParaNullCheck(req,"user");
             int amount = Common.inputIntParaNullCheck(req,"amount");
+            int duration = Common.inputIntParaNullCheck(req,"duration");
 
 
             GymSubscriptionPlans gymSubscriptionPlans   = new  GymSubscriptionPlans();
@@ -1131,6 +1135,7 @@ public class GymOwnerController {
             gymSubscriptionPlans.setUpdated(user);
             gymSubscriptionPlans.setStatus(true);
             gymSubscriptionPlans.setDescription(subscriptiontext);
+            gymSubscriptionPlans.setDuration(duration);
 
             if(gymSubscriptionPlansService.checkIfExist(gymSubscriptionPlans)==null){
 
@@ -1485,7 +1490,12 @@ public class GymOwnerController {
             String phone = Common.inputStringParaNullCheck(req,"phone");
             String email = Common.inputStringParaNullCheck(req,"email");
             int subscription = Common.inputIntParaNullCheck(req,"subscription");
+            int dietPlan = Common.inputIntParaNullCheck(req,"dietPlan");
+            boolean diet = false;
+            if(dietPlan==1){
 
+                 diet = true;
+            }
 
             long uniqueIDL = System.currentTimeMillis();
             String uniqueID = uniqueIDL+""+UUID.randomUUID().toString();
@@ -1513,6 +1523,8 @@ public class GymOwnerController {
             gymUsers.setPt(0);
             gymUsers.setSubscription(subscription);
             gymUsers.setRecentactivity(0);
+            gymUsers.setDiet(diet);
+            gymUsers.setDietplan(dietPlan);
             GymUsers owner = gymUsersService.findUserExist(gymUsers);
             GymUsers gymUsers1 = new GymUsers();
             if (owner == null){
@@ -1557,6 +1569,48 @@ public class GymOwnerController {
             res.put("status",status);
             res.put("statusDesc",statusDesc);
             res.put("user_id",user_id );
+        }
+        return res.toString();
+
+
+
+    }
+
+    @CrossOrigin
+    @PostMapping("/loadNotifications")
+    public String loadNotifications(@RequestBody String jsonReq) {
+
+        Boolean status = false;
+        String statusDesc = "Failed";
+        int notification_count = 0;
+        JSONObject res = new JSONObject();
+        JSONArray dietPlan = new JSONArray();
+        try {
+            System.out.println("gymOwnerService --> addNewUser " + jsonReq);
+            JSONObject req = new JSONObject(jsonReq);
+
+            int gym_id = Common.inputIntParaNullCheck(req,"gym_id");
+
+            List<GymUsers> dietUsers = gymUsersService.findCustomerYetToAddDietPlan(gym_id);
+            for(GymUsers user : dietUsers){
+
+                JSONObject userJson = new JSONObject();
+                userJson.put("name",user.getName());
+                userJson.put("id",user.getId());
+                userJson.put("phone",user.getPhone());
+                dietPlan.put(userJson);
+            }
+
+            notification_count = dietPlan.length();
+
+            status=true;
+            statusDesc = "Success";
+
+        }catch(Exception e){ e.printStackTrace();}finally {
+            res.put("status",status);
+            res.put("statusDesc",statusDesc);
+            res.put("notification_count",notification_count );
+            res.put("dietPlan",dietPlan );
         }
         return res.toString();
 
@@ -1825,6 +1879,247 @@ public class GymOwnerController {
             res.put("status",status);
             res.put("statusDesc",statusDesc);
             res.put("profile_id",profile_id );
+        }
+        return res.toString();
+
+
+
+    }
+
+    @CrossOrigin
+    @PostMapping("/addNewDietPlan")
+    public String addNewDietPlan(@RequestBody String jsonReq) {
+
+
+        Boolean status = false;
+        String statusDesc = "Failed";
+        int diet_id = 0;
+        JSONObject res = new JSONObject();
+
+        try {
+            JSONObject req = new JSONObject(jsonReq);
+
+
+            int gym_id =Common.inputIntParaNullCheck(req,"gym_id");
+            int addedBy =Common.inputIntParaNullCheck(req,"addedBy");
+            String dietDetails =Common.inputStringParaNullCheck(req,"dietDetails");
+            String dietname =Common.inputStringParaNullCheck(req,"dietname");
+
+
+            if(dietDetails.length()!=0){
+
+                dietDetails = dietDetails.toUpperCase();
+            }
+
+            List<GymDietPlans> extDiet = gymDietPlansService.checkDietExist(dietDetails,gym_id);
+            if(extDiet.isEmpty()) {
+
+                GymDietPlans diet = new GymDietPlans();
+                diet.setStatus(true);
+                diet.setDiet_details(dietDetails);
+                diet.setGymid(gym_id);
+                diet.setAddedby(addedBy);
+                diet.setDiet_name(dietname);
+                GymDietPlans newDiet = gymDietPlansService.saveDiet(diet);
+                if(newDiet != null){
+
+                    status=true;
+                    statusDesc = "Diet added successfully";
+                }else{
+                    statusDesc = "Operation failed";
+                }
+
+            }else {
+
+                statusDesc = "Same diet already exists";
+
+            }
+
+
+
+
+
+        }catch(Exception e){ e.printStackTrace();}finally {
+            res.put("status",status);
+            res.put("statusDesc",statusDesc);
+            res.put("diet_id",diet_id );
+        }
+        return res.toString();
+
+
+
+    }
+
+    @CrossOrigin
+    @PostMapping("/findDietPlans")
+    public String findDietPlans(@RequestBody String jsonReq) {
+
+
+        Boolean status = false;
+        String statusDesc = "Failed";
+        JSONArray dietPlans  = new JSONArray();
+        JSONObject res = new JSONObject();
+
+        try {
+            JSONObject req = new JSONObject(jsonReq);
+
+
+            int gym_id =Common.inputIntParaNullCheck(req,"gym_id");
+            int offset =Common.inputIntParaNullCheck(req,"offset");
+
+
+            List<Map<String, Object>> extDiet = gymDietPlansService.findDietPlans(gym_id,offset);
+            if(!extDiet.isEmpty()) {
+
+                for(Map<String, Object> diet:extDiet) {
+                    JSONObject dietJson = new JSONObject();
+                    Object diet_id = ((diet.get("id") == null) ? "0" : diet.get("id")).toString();
+                    Object details = ((diet.get("details") == null) ? "" : diet.get("details")).toString();
+                    Object created = ((diet.get("created") == null) ? "" : diet.get("created")).toString();
+                    Object added = ((diet.get("added") == null) ? "" : diet.get("added")).toString();
+                    Object dietname = ((diet.get("dietname") == null) ? "" : diet.get("dietname")).toString();
+                    dietJson.put("diet_details", details);
+                    dietJson.put("diet_id", diet_id);
+                    dietJson.put("addedby", added);
+                    dietJson.put("created", created);
+                    dietJson.put("dietname", dietname);
+                    dietPlans.put(dietJson);
+                }
+                status=true;
+                statusDesc = "Diet plans fetched successfully";
+                /*for(GymDietPlans diet:extDiet){
+
+                    JSONObject dietJson = new JSONObject();
+                    dietJson.put("diet_details",diet.getDiet_details());
+                    dietJson.put("diet_id",diet.getId());
+                    dietJson.put("addedby",diet.getAddedby());
+                    dietJson.put("addedon",diet.getCreated());
+                    dietPlans.put(dietJson);
+
+                }*/
+            }else {
+
+                statusDesc = "No diet plan added so far";
+
+            }
+
+
+
+
+
+        }catch(Exception e){ e.printStackTrace();}finally {
+            res.put("status",status);
+            res.put("statusDesc",statusDesc);
+            res.put("dietPlans",dietPlans );
+        }
+        return res.toString();
+
+
+
+    }
+    @CrossOrigin
+    @PostMapping("/findDietPlansFull")
+    public String findDietPlansFull(@RequestBody String jsonReq) {
+
+
+        Boolean status = false;
+        String statusDesc = "Failed";
+        JSONArray dietPlans  = new JSONArray();
+        JSONObject res = new JSONObject();
+
+        try {
+            JSONObject req = new JSONObject(jsonReq);
+
+
+            int gym_id =Common.inputIntParaNullCheck(req,"gym_id");
+
+
+            List<Map<String, Object>> extDiet = gymDietPlansService.findDietPlansFull(gym_id);
+            if(!extDiet.isEmpty()) {
+
+                for(Map<String, Object> diet:extDiet) {
+                    JSONObject dietJson = new JSONObject();
+                    Object diet_id = ((diet.get("id") == null) ? "0" : diet.get("id")).toString();
+                    Object details = ((diet.get("details") == null) ? "" : diet.get("details")).toString();
+                    Object created = ((diet.get("created") == null) ? "" : diet.get("created")).toString();
+                    Object added = ((diet.get("added") == null) ? "" : diet.get("added")).toString();
+                    Object dietname = ((diet.get("dietname") == null) ? "" : diet.get("dietname")).toString();
+                    dietJson.put("diet_details", details);
+                    dietJson.put("diet_id", diet_id);
+                    dietJson.put("addedby", added);
+                    dietJson.put("created", created);
+                    dietJson.put("dietname", dietname);
+                    dietPlans.put(dietJson);
+                }
+                status=true;
+                statusDesc = "Diet plans fetched successfully";
+                /*for(GymDietPlans diet:extDiet){
+
+                    JSONObject dietJson = new JSONObject();
+                    dietJson.put("diet_details",diet.getDiet_details());
+                    dietJson.put("diet_id",diet.getId());
+                    dietJson.put("addedby",diet.getAddedby());
+                    dietJson.put("addedon",diet.getCreated());
+                    dietPlans.put(dietJson);
+
+                }*/
+            }else {
+
+                statusDesc = "No diet plan added so far";
+
+            }
+
+
+
+
+
+        }catch(Exception e){ e.printStackTrace();}finally {
+            res.put("status",status);
+            res.put("statusDesc",statusDesc);
+            res.put("dietPlans",dietPlans );
+        }
+        return res.toString();
+
+
+
+    }
+    @CrossOrigin
+    @PostMapping("/delDietPlans")
+    public String delDietPlans(@RequestBody String jsonReq) {
+
+
+        Boolean status = false;
+        String statusDesc = "Failed";
+        JSONObject res = new JSONObject();
+
+        try {
+            JSONObject req = new JSONObject(jsonReq);
+
+
+            int diet_id =Common.inputIntParaNullCheck(req,"diet_id");
+            int user =Common.inputIntParaNullCheck(req,"user");
+
+
+            Integer delCount = gymDietPlansService.delDietPlan(diet_id,user);
+            if(delCount!=0) {
+
+
+                status=true;
+                statusDesc = "Diet plan deleted successfully";
+
+            }else {
+
+                statusDesc="Action failed";
+
+            }
+
+
+
+
+
+        }catch(Exception e){ e.printStackTrace();}finally {
+            res.put("status",status);
+            res.put("statusDesc",statusDesc);
         }
         return res.toString();
 
@@ -2366,6 +2661,65 @@ public class GymOwnerController {
                 if(!customer_exist.isEmpty()){
 
                      updated = gymUsersService.mapSub(gym_id,customer,sub,userid);
+                    if(updated!=0){
+
+                        statusDesc ="Mapped Successfully";
+                        status=true;
+                    }else{
+                        statusDesc ="Operation failed";
+                    }
+
+
+                }else{
+                    statusDesc = "Wrong user";
+                }
+            }else{
+                statusDesc = "Mandatory fields are missing";
+            }
+
+
+
+
+        }catch(Exception e){ e.printStackTrace();}finally {
+            res.put("status",status);
+            res.put("statusDesc",statusDesc);
+        }
+
+        return res.toString();
+
+
+
+    }
+    @CrossOrigin
+    @PostMapping("/mapDietPlan")
+
+    public String mapDietPlan(@RequestBody String jsonReq) {
+
+        Boolean status = false;
+        String statusDesc = "Failed";
+
+
+        int updated = 0;
+
+        JSONObject res = new JSONObject();
+        try{
+            System.out.println("gymOwnerService --> loadProfile "+jsonReq);
+            JSONObject req = new JSONObject(jsonReq);
+            /*String gym_id_str = req.get("gym_id").toString();
+            int gym_id = Integer.valueOf(gym_id_str);*/
+            int gym_id = Common.inputIntParaNullCheck(req,"gym_id");
+            int customer = Common.inputIntParaNullCheck(req,"customer");
+            int diet = Common.inputIntParaNullCheck(req,"diet");
+            int userid = Common.inputIntParaNullCheck(req,"userid");
+
+
+            if(diet!=0 && customer!=0){
+
+                Optional<GymUsers> customer_exist=  gymUsersService.findByUser_id(customer);
+
+                if(!customer_exist.isEmpty()){
+
+                     updated = gymUsersService.mapDiet(gym_id,customer,diet,userid);
                     if(updated!=0){
 
                         statusDesc ="Mapped Successfully";
