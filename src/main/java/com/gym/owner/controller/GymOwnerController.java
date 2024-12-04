@@ -1577,6 +1577,73 @@ public class GymOwnerController {
     }
 
     @CrossOrigin
+    @PostMapping("/editGymUser")
+    public String editGymUser(@RequestBody String jsonReq) {
+
+        Boolean status = false;
+        String statusDesc = "Failed";
+        int user_id = 0;
+        JSONObject res = new JSONObject();
+
+        try {
+            System.out.println("gymOwnerService --> addNewUser " + jsonReq);
+            JSONObject req = new JSONObject(jsonReq);
+
+
+            int user = Common.inputIntParaNullCheck(req,"user");
+            int customer_id = Common.inputIntParaNullCheck(req,"customer_id");
+            int profile_id = Common.inputIntParaNullCheck(req,"profile_id");
+            String name = Common.inputStringParaNullCheck(req,"name");
+            String address = Common.inputStringParaNullCheck(req,"address");
+            String email = Common.inputStringParaNullCheck(req,"email");
+            int subscription = Common.inputIntParaNullCheck(req,"subscription");
+            int dietPlan = Common.inputIntParaNullCheck(req,"dietPlan");
+            boolean diet = false;
+            if(dietPlan==1){
+
+                 diet = true;
+            }
+
+
+            Optional<GymUsers> gymUsersList = gymUsersService.findByUser_id(customer_id);
+            if(!gymUsersList.isEmpty()){
+
+                GymUsers gymUsers = gymUsersList.get();
+
+                gymUsers.setName(name);
+                gymUsers.setAddress(address);
+                gymUsers.setProfile(profile_id);
+                gymUsers.setEmail(email);
+                gymUsers.setSubscription(subscription);
+                gymUsers.setDiet(diet);
+                gymUsers.setDietplan(dietPlan);
+                gymUsers.setUpdatedby(user);
+                GymUsers owner = gymUsersService.saveUser(gymUsers);
+                if(owner!=null){
+                    status = true;
+                    statusDesc = "User updated successfully";
+                }
+
+            }else{
+                statusDesc="User not exist";
+            }
+
+
+
+
+
+        }catch(Exception e){ e.printStackTrace();}finally {
+            res.put("status",status);
+            res.put("statusDesc",statusDesc);
+            res.put("user_id",user_id );
+        }
+        return res.toString();
+
+
+
+    }
+
+    @CrossOrigin
     @PostMapping("/loadNotifications")
     public String loadNotifications(@RequestBody String jsonReq) {
 
@@ -2873,6 +2940,11 @@ public class GymOwnerController {
                     profileEnt.put("addedOn",((gymUsers.get("created") == null) ? "" : gymUsers.get("created")).toString());
                     profileEnt.put("address",((gymUsers.get("address") == null) ? "Not Available" : gymUsers.get("address")).toString());
                     profileEnt.put("subscription",((gymUsers.get("description") == null) ? "Not Added" : gymUsers.get("description")).toString());
+                    profileEnt.put("subscriptionId",((gymUsers.get("subscription") == null) ? "0" : gymUsers.get("subscription")).toString());
+                    profileEnt.put("dietname",((gymUsers.get("dietname") == null) ? "Not Added" : gymUsers.get("dietname")).toString());
+                    profileEnt.put("dietplan",((gymUsers.get("dietplan") == null) ? "0" : gymUsers.get("dietplan")).toString());
+                    profileEnt.put("email",((gymUsers.get("email") == null) ? "" : gymUsers.get("email")).toString());
+                    profileEnt.put("profile",((gymUsers.get("profile") == null) ? "0" : gymUsers.get("profile")).toString());
 
 
 
