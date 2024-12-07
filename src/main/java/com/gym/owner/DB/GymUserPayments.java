@@ -25,6 +25,7 @@ public class GymUserPayments {
     @Column(name = "payyear")
     private int payyear;
     private float amount;
+    private float finalamount;
     @CreationTimestamp
     private Timestamp createdon;
     @UpdateTimestamp
@@ -32,8 +33,11 @@ public class GymUserPayments {
     private String description;
     private boolean status;
     private int subscription;
+    private int fromdoy;
+    private int todoy;
 
-    public GymUserPayments(int id, int gym, int customer, int addedby, int updatedby, int paymonth, int payyear, float amount, Timestamp createdon, Timestamp updatedon, String description, boolean status, int subscription) {
+
+    public GymUserPayments(int id, int gym, int customer, int addedby, int updatedby, int paymonth, int payyear, float amount, float finalamount, Timestamp createdon, Timestamp updatedon, String description, boolean status, int subscription, int fromdoy, int todoy) {
         this.id = id;
         this.gym = gym;
         this.customer = customer;
@@ -42,16 +46,20 @@ public class GymUserPayments {
         this.paymonth = paymonth;
         this.payyear = payyear;
         this.amount = amount;
+        this.finalamount = finalamount;
         this.createdon = createdon;
         this.updatedon = updatedon;
         this.description = description;
         this.status = status;
         this.subscription = subscription;
+        this.fromdoy = fromdoy;
+        this.todoy = todoy;
     }
 
     public GymUserPayments() {
 
     }
+
 
     public int getId() {
         return id;
@@ -117,6 +125,14 @@ public class GymUserPayments {
         this.amount = amount;
     }
 
+    public float getFinalamount() {
+        return finalamount;
+    }
+
+    public void setFinalamount(float finalamount) {
+        this.finalamount = finalamount;
+    }
+
     public Timestamp getCreatedon() {
         return createdon;
     }
@@ -155,5 +171,21 @@ public class GymUserPayments {
 
     public void setSubscription(int subscription) {
         this.subscription = subscription;
+    }
+
+    public int getFromdoy() {
+        return fromdoy;
+    }
+
+    public void setFromdoy(int fromdoy) {
+        this.fromdoy = fromdoy;
+    }
+
+    public int getTodoy() {
+        return todoy;
+    }
+
+    public void setTodoy(int todoy) {
+        this.todoy = todoy;
     }
 }

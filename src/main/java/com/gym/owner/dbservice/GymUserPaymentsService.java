@@ -38,7 +38,10 @@ public class GymUserPaymentsService {
     public List<Map<String, Object>> getGymPaymentsFilterYear(int gym, int payyear,int offset) {
         return gymUserPaymentsRepo.getGymPaymentsFilterYear(gym,payyear,10,offset);
     }
-public List<Map<String, Object>> getGymPaymentsFilterCustomerYear(int gym,int payyear,int customer, int offset) {
+    public List<Map<String, Object>> getpendingPaymentsList(int gym, int profile,int year,int doy) {
+        return gymUserPaymentsRepo.getpendingPaymentsList(gym,profile,year,doy);
+    }
+    public List<Map<String, Object>> getGymPaymentsFilterCustomerYear(int gym,int payyear,int customer, int offset) {
         return gymUserPaymentsRepo.getGymPaymentsFilterCustomerYear(gym,payyear,customer,10,offset);
     }
 

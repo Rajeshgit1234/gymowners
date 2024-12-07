@@ -7,4 +7,5 @@ import java.util.List;
 
 public interface GymListRepo  extends CrudRepository<GymList, Integer> {
     public List<GymList> findById(int id);
+    public List<GymList> findByActive(Boolean active);
 }

@@ -52,6 +52,14 @@ public interface GymUserPaymentsRepo  extends JpaRepository<GymUserPayments, Int
             nativeQuery = true
     )
     List<Map<String, Object>> getGymPaymentsFilterYear(@Param("gym") int gym,@Param("payyear") int payyear, @Param("limit") int limit, @Param("offset") int offset);
+
+    @Query(
+            value = "select usertable.id as id,usertable.name as name from (select gu.id as id,gu.name as name from gym_users gu where gu.gym=:gym and gu.profile=:profile and gu.id not in (select gup.customer from gym_user_payments gup  where (gup.payyear>:year)) ) as usertable where usertable.id not in (select gup.customer from gym_user_payments gup  where (gup.todoy>:doy and gup.payyear>=:year)) order by id desc;",
+            nativeQuery = true
+    )
+    List<Map<String, Object>> getpendingPaymentsList(@Param("gym") int gym,@Param("profile") int profile, @Param("year") int year, @Param("doy") int doy);
+
+
     @Query(
             value = "SELECT payments.id, payments.gym, payments.customer, payments.addedby, payments.amount, payments.createdon, payments.description, payments.status,payments.paymonth,payments.payyear, subscription,users.name FROM gym_user_payments payments,gym_users users  where users.id=payments.customer and  payments.gym=:gym and payments.status=true and payments.payyear=:payyear and payments.customer=:customer order by payments.paymonth,payments.id desc LIMIT :limit OFFSET :offset",
             nativeQuery = true

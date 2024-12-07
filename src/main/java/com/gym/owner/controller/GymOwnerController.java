@@ -1,11 +1,16 @@
 package com.gym.owner.controller;
 
 import com.gym.owner.DB.*;
+import com.gym.owner.common.RedisJava;
 import com.gym.owner.dbservice.*;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPool;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
@@ -17,6 +22,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @RestController
+@Component
 public class GymOwnerController {
 
     @Autowired
@@ -56,6 +62,68 @@ public class GymOwnerController {
 
     @Autowired
     private GymDietPlansService gymDietPlansService;
+
+
+
+   /* @Scheduled(fixedRate = 60000)
+    public void setRedisCache() {
+
+
+        try{
+            LocalDate currentdate = LocalDate.now();
+            int currentYear = currentdate.getYear();
+            Calendar calendar = Calendar.getInstance();
+            int dayOfYear = calendar.get(Calendar.DAY_OF_YEAR);
+
+
+            Jedis jedis = RedisJava.getJedis();
+           List<GymList> gymLists =  gymListService.findByActive();
+           for (GymList gymList : gymLists) {
+               JSONArray payemtnsPending = new JSONArray();
+               JSONArray dietPlan = new JSONArray();
+               JSONObject notificationJson = new JSONObject();
+
+
+               List<Map<String, Object>> payemntsList= gymUserPaymentsService.getpendingPaymentsList(gymList.getId(),Common.GYM_CUSTOMERS,currentYear,dayOfYear);
+
+               if(!payemntsList.isEmpty()) {
+
+                   for (Map<String, Object> payemnts : payemntsList) {
+                       JSONObject payItem = new JSONObject();
+
+
+                       payItem.put("id", payemnts.get("id"));
+                       payItem.put("name", payemnts.get("name"));
+                       payemtnsPending.put(payItem);
+                   }
+               }
+
+               notificationJson.put("payemntPending", payemtnsPending);
+               notificationJson.put("payemntPendingCount", payemtnsPending.length());
+
+               List<GymUsers> dietUsers = gymUsersService.findCustomerYetToAddDietPlan(gymList.getId());
+               for(GymUsers user : dietUsers){
+
+                   JSONObject userJson = new JSONObject();
+                   userJson.put("name",user.getName());
+                   userJson.put("id",user.getId());
+                   userJson.put("phone",user.getPhone());
+                   dietPlan.put(userJson);
+               }
+               notificationJson.put("dietPlan", dietPlan);
+               notificationJson.put("dietPlanPendingCount", dietPlan.length());
+                String redis_key = "not_"+gymList.getId();
+               jedis.set(redis_key, notificationJson.toString());
+
+
+           }
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }*/
+
 
     @CrossOrigin
     @PostMapping("/weblogin")
@@ -1651,33 +1719,68 @@ public class GymOwnerController {
         String statusDesc = "Failed";
         int notification_count = 0;
         JSONObject res = new JSONObject();
+        JSONArray payemtnsPending = new JSONArray();
         JSONArray dietPlan = new JSONArray();
+        JSONObject notificationJson = new JSONObject();
         try {
             System.out.println("gymOwnerService --> addNewUser " + jsonReq);
             JSONObject req = new JSONObject(jsonReq);
 
             int gym_id = Common.inputIntParaNullCheck(req,"gym_id");
 
-            List<GymUsers> dietUsers = gymUsersService.findCustomerYetToAddDietPlan(gym_id);
-            for(GymUsers user : dietUsers){
 
-                JSONObject userJson = new JSONObject();
-                userJson.put("name",user.getName());
-                userJson.put("id",user.getId());
-                userJson.put("phone",user.getPhone());
-                dietPlan.put(userJson);
-            }
+            LocalDate currentdate = LocalDate.now();
+            int currentYear = currentdate.getYear();
+            Calendar calendar = Calendar.getInstance();
+            int dayOfYear = calendar.get(Calendar.DAY_OF_YEAR);
 
-            notification_count = dietPlan.length();
 
-            status=true;
-            statusDesc = "Success";
+            Jedis jedis = RedisJava.getJedis();
+            List<GymList> gymLists =  gymListService.findByActive();
+
+
+
+
+                List<Map<String, Object>> payemntsList= gymUserPaymentsService.getpendingPaymentsList(gym_id,Common.GYM_CUSTOMERS,currentYear,dayOfYear);
+
+                if(!payemntsList.isEmpty()) {
+
+                    for (Map<String, Object> payemnts : payemntsList) {
+                        JSONObject payItem = new JSONObject();
+
+
+                        payItem.put("id", payemnts.get("id"));
+                        payItem.put("name", payemnts.get("name"));
+                        payemtnsPending.put(payItem);
+                    }
+                }
+
+                notificationJson.put("payemntPending", payemtnsPending);
+                notificationJson.put("payemntPendingCount", payemtnsPending.length());
+
+                List<GymUsers> dietUsers = gymUsersService.findCustomerYetToAddDietPlan(gym_id);
+                for(GymUsers user : dietUsers){
+
+                    JSONObject userJson = new JSONObject();
+                    userJson.put("name",user.getName());
+                    userJson.put("id",user.getId());
+                    userJson.put("phone",user.getPhone());
+                    dietPlan.put(userJson);
+                }
+                notificationJson.put("dietPlan", dietPlan);
+                notificationJson.put("dietPlanPendingCount", dietPlan.length());
+
+                status = true;
+                statusDesc="Data fetched successfully";
+
+            notification_count = dietPlan.length()+payemtnsPending.length();
 
         }catch(Exception e){ e.printStackTrace();}finally {
             res.put("status",status);
             res.put("statusDesc",statusDesc);
+            res.put("notificationJson",notificationJson );
             res.put("notification_count",notification_count );
-            res.put("dietPlan",dietPlan );
+
         }
         return res.toString();
 
@@ -3358,7 +3461,7 @@ public class GymOwnerController {
 
 
     }
-@CrossOrigin
+    @CrossOrigin
     @PostMapping("/markCustomerPayments")
 
     public String markCustomerPayments(@RequestBody String jsonReq) {
@@ -3397,6 +3500,12 @@ public class GymOwnerController {
             String description = Common.inputStringParaNullCheck(req,"description");
             int subscription = Common.inputIntParaNullCheck(req,"subscription");
 
+            Calendar calendar = Calendar.getInstance();
+            int dayOfYear = calendar.get(Calendar.DAY_OF_YEAR);
+            Calendar cal_end = Calendar.getInstance();
+            cal_end.add(Calendar.MONTH, 1);
+
+
             boolean sameyear = true;
             boolean diffMonth = true;
 
@@ -3406,6 +3515,7 @@ public class GymOwnerController {
             if(fromMonth==toMonth && fromYear==toYear){
 
                 diffMonth= false;
+
             }
 
             if(!diffMonth){
@@ -3504,6 +3614,76 @@ public class GymOwnerController {
                 status=false;
             }*/
 
+
+
+        }catch(Exception e){ e.printStackTrace();}finally {
+            res.put("status",status);
+            res.put("statusDesc",statusDesc);
+            res.put("paymentid",payIds );
+        }
+
+        return res.toString();
+
+
+
+    }
+    @CrossOrigin
+    @PostMapping("/markCustomerPaymentsV2")
+
+    public String markCustomerPaymentsV2(@RequestBody String jsonReq) {
+
+        Boolean status = false;
+        String statusDesc = "Failed";
+        statusDesc = "Operation failed";
+        ArrayList<Integer> payIds = new ArrayList<>();
+    int paymentid=0;
+            JSONObject res = new JSONObject();
+        try{
+            System.out.println("gymOwnerService --> addExpense "+jsonReq);
+            JSONObject req = new JSONObject(jsonReq);
+
+
+            int gym_id = Common.inputIntParaNullCheck(req,"gym_id");
+            int addedby = Common.inputIntParaNullCheck(req,"addedby");
+            int customer = Common.inputIntParaNullCheck(req,"customer");
+            int duration = Common.inputIntParaNullCheck(req,"duration");
+            float amount = Common.inputFloatParaNullCheck(req,"amount");
+            float finalamount = Common.inputFloatParaNullCheck(req,"finalamount");
+            int year = Common.inputIntParaNullCheck(req,"year");
+            String description = Common.inputStringParaNullCheck(req,"description");
+            String fromdate = Common.inputStringParaNullCheck(req,"fromdate");
+            int subscription = Common.inputIntParaNullCheck(req,"subscription");
+
+            Date fromDate = DATE_TIME_FORMAT.parse(fromdate);
+            Date endDate = DATE_TIME_FORMAT.parse(fromdate);
+            Calendar from_cal = Calendar.getInstance();
+            from_cal.setTime(fromDate);
+
+            endDate.setMonth(endDate.getMonth() + 1);
+
+            int dayOfYear = from_cal.get(Calendar.DAY_OF_YEAR);
+            from_cal.add(Calendar.MONTH, duration);
+            int toDayOfYear = from_cal.get(Calendar.DAY_OF_YEAR);
+
+
+
+            GymUserPayments gymUserPayments = new GymUserPayments();
+            gymUserPayments.setGym(gym_id);
+            gymUserPayments.setCustomer(customer);
+            gymUserPayments.setAddedby(addedby);
+            gymUserPayments.setAmount(amount);
+            gymUserPayments.setDescription(description);
+            gymUserPayments.setSubscription(subscription);
+            gymUserPayments.setFinalamount(finalamount);
+            gymUserPayments.setFromdoy(dayOfYear);
+            gymUserPayments.setTodoy(toDayOfYear);
+            gymUserPayments.setStatus(true);
+            gymUserPayments.setPayyear(year);
+            payIds.add(gymUserPaymentsService.InsertPayments(gymUserPayments).getId());
+
+
+            status = true;
+            statusDesc = "Added successfully";
 
 
         }catch(Exception e){ e.printStackTrace();}finally {

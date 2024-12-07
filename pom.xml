@@ -72,6 +72,12 @@
 			<groupId>com.konghq</groupId>
 			<artifactId>unirest-java-core</artifactId>
 		</dependency>
+		<!-- https://mvnrepository.com/artifact/redis.clients/jedis -->
+		<dependency>
+			<groupId>redis.clients</groupId>
+			<artifactId>jedis</artifactId>
+			<version>5.0.2</version>
+		</dependency>
 
 
 	</dependencies>
