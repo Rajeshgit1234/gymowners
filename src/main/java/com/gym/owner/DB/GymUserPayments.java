@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
 
@@ -35,9 +36,10 @@ public class GymUserPayments {
     private int subscription;
     private int fromdoy;
     private int todoy;
+    private Date frompaydate;
+    private Date topaydate;
 
-
-    public GymUserPayments(int id, int gym, int customer, int addedby, int updatedby, int paymonth, int payyear, float amount, float finalamount, Timestamp createdon, Timestamp updatedon, String description, boolean status, int subscription, int fromdoy, int todoy) {
+    public GymUserPayments(int id, int gym, int customer, int addedby, int updatedby, int paymonth, int payyear, float amount, float finalamount, Timestamp createdon, Timestamp updatedon, String description, boolean status, int subscription, int fromdoy, int todoy, Date frompaydate, Date topaydate) {
         this.id = id;
         this.gym = gym;
         this.customer = customer;
@@ -54,12 +56,13 @@ public class GymUserPayments {
         this.subscription = subscription;
         this.fromdoy = fromdoy;
         this.todoy = todoy;
+        this.frompaydate = frompaydate;
+        this.topaydate = topaydate;
     }
 
     public GymUserPayments() {
 
     }
-
 
     public int getId() {
         return id;
@@ -187,5 +190,21 @@ public class GymUserPayments {
 
     public void setTodoy(int todoy) {
         this.todoy = todoy;
+    }
+
+    public Date getFrompaydate() {
+        return frompaydate;
+    }
+
+    public void setFrompaydate(Date frompaydate) {
+        this.frompaydate = frompaydate;
+    }
+
+    public Date getTopaydate() {
+        return topaydate;
+    }
+
+    public void setTopaydate(Date topaydate) {
+        this.topaydate = topaydate;
     }
 }

@@ -1301,6 +1301,70 @@ public class GymOwnerController {
 
 
     }
+    @CrossOrigin
+    @PostMapping("/fetchSubscriptionPlansFull")
+    public String fetchSubscriptionPlansFull(@RequestBody String jsonReq) {
+
+        Boolean status = false;
+        String statusDesc = "Failed";
+        JSONArray subscriptionPlans =new JSONArray();
+
+        JSONObject res = new JSONObject();
+        int subscriptionid = 0;
+
+        try{
+            System.out.println("gymOwnerService --> addExpense "+jsonReq);
+            JSONObject req = new JSONObject(jsonReq);
+            int gym = Common.inputIntParaNullCheck(req,"gym");
+
+
+            if(gym!=0){
+
+                List<GymSubscriptionPlans> subscriptionPlanList= gymSubscriptionPlansService.getPlansFull(gym);
+                if (!subscriptionPlanList.isEmpty()) {
+
+                    /*for (GymSubscriptionPlans plans : subscriptionPlanList) {
+
+                        JSONObject plan = new JSONObject();
+                        plan.put("subId", plans.getId());
+                        plan.put("subName", plans.getDescription());
+                        plan.put("addedOn", plans.getCreatedon());
+                        plan.put("addedBy", plans.getCreatedon());
+                        subscriptionPlans.put(plan);
+                    }*/
+
+                    for(GymSubscriptionPlans plans:subscriptionPlanList) {
+
+                        JSONObject plan = new JSONObject();
+
+                        plan.put("subId",plans.getId());
+                        plan.put("subName",plans.getDescription());
+                        plan.put("subAmount",plans.getAmount());
+                        plan.put("duration",plans.getDuration());
+                        subscriptionPlans.put(plan);
+
+
+                    }
+                    statusDesc="Fetched Successfully";
+                    status = true;
+                }
+            }else{
+                statusDesc="Mandatory fields missing";
+            }
+
+
+
+
+        }catch(Exception e){ e.printStackTrace();}finally {
+            res.put("status",status);
+            res.put("statusDesc",statusDesc);
+            res.put("subscriptionPlans",subscriptionPlans );
+        }
+        return res.toString();
+
+
+
+    }
 
     @CrossOrigin
     @PostMapping("/EditExpense")
@@ -1729,19 +1793,7 @@ public class GymOwnerController {
             int gym_id = Common.inputIntParaNullCheck(req,"gym_id");
 
 
-            LocalDate currentdate = LocalDate.now();
-            int currentYear = currentdate.getYear();
-            Calendar calendar = Calendar.getInstance();
-            int dayOfYear = calendar.get(Calendar.DAY_OF_YEAR);
-
-
-            Jedis jedis = RedisJava.getJedis();
-            List<GymList> gymLists =  gymListService.findByActive();
-
-
-
-
-                List<Map<String, Object>> payemntsList= gymUserPaymentsService.getpendingPaymentsList(gym_id,Common.GYM_CUSTOMERS,currentYear,dayOfYear);
+                List<Map<String, Object>> payemntsList= gymUserPaymentsService.getpendingPaymentsList(gym_id,Common.GYM_CUSTOMERS);
 
                 if(!payemntsList.isEmpty()) {
 
@@ -2720,6 +2772,7 @@ public class GymOwnerController {
                     profileEnt.put("id",gymUsers.get("id"));
                     profileEnt.put("addedby",gymUsers.get("added"));
                     profileEnt.put("addedOn",gymUsers.get("created"));
+                    profileEnt.put("subscription",gymUsers.get("subscription"));
 
                    /* profileEnt.put("username",gymUsersList.get().getUsername());
                     profileEnt.put("name",gymUsersList.get().getName());
@@ -3140,6 +3193,87 @@ public class GymOwnerController {
 
 
     }
+    @CrossOrigin
+    @PostMapping("/loadCustomerPaymentsByCustid")
+
+    public String loadCustomerPaymentsByCustid(@RequestBody String jsonReq) {
+
+        Boolean status = false;
+        String statusDesc = "Failed";
+        statusDesc = "Operation failed";
+
+        JSONArray paymentsJson =new JSONArray();
+        DecimalFormat formatter
+                = new DecimalFormat("₹#,##0.00");
+        JSONObject res = new JSONObject();
+        try{
+            System.out.println("gymOwnerService --> addExpense "+jsonReq);
+            JSONObject req = new JSONObject(jsonReq);
+            /*String gym_id_str = req.get("gym_id").toString();
+            String offset_str = req.get("offset").toString();
+            int gym_id = Integer.valueOf(gym_id_str);
+            int offset = Integer.valueOf(offset_str);*/
+            int gym_id = Common.inputIntParaNullCheck(req,"gym_id");
+            int offset = Common.inputIntParaNullCheck(req,"offset");
+            int customer = Common.inputIntParaNullCheck(req,"customer");
+
+            List<Map<String, Object>> paymentsList= gymUserPaymentsService.getGymPaymentsCustomer(customer,offset);
+
+            if(!paymentsList.isEmpty()){
+
+                for(Map<String, Object> pay:paymentsList){
+                    JSONObject expenseItem = new JSONObject();
+
+                    int fromDoy = Integer.parseInt(pay.get("fromdoy").toString());
+                    int todoy = Integer.parseInt(pay.get("todoy").toString());
+                    int payyear = Integer.parseInt(pay.get("payyear").toString());
+                    int duration = Integer.parseInt(pay.get("duration").toString());
+
+                    Year y = Year.of( payyear ) ;
+                    LocalDate toDoyld = y.atDay( todoy ) ;
+
+                    LocalDate returnvalue
+                            = toDoyld.minusMonths(duration);
+
+                    DateTimeFormatter formatterDOY = DateTimeFormatter.ofPattern("dd LLLL yyyy");
+                    String toDate = toDoyld.format(formatterDOY);
+                    String strDate = returnvalue.format(formatterDOY);
+
+
+
+                    expenseItem.put("customer",pay.get("customer"));
+                    expenseItem.put("description",pay.get("description"));
+                    expenseItem.put("subscription",pay.get("subscription"));
+                    expenseItem.put("amount",pay.get("amount"));
+                    expenseItem.put("createdon",pay.get("createdon"));
+                    expenseItem.put("id",pay.get("id"));
+                    expenseItem.put("name",pay.get("name"));
+                    expenseItem.put("paymonth",pay.get("paymonth"));
+                    expenseItem.put("payyear",pay.get("payyear"));
+                    expenseItem.put("strDate",strDate);
+                    expenseItem.put("toDate",toDate);
+
+
+
+                    paymentsJson.put(expenseItem);
+                }
+
+            }
+            statusDesc = "Data fetched";
+            status=true;
+
+
+        }catch(Exception e){ e.printStackTrace();}finally {
+            res.put("status",status);
+            res.put("statusDesc",statusDesc);
+            res.put("payList",paymentsJson );
+        }
+
+        return res.toString();
+
+
+
+    }
 
     @CrossOrigin
     @PostMapping("/loadGymEnq")
@@ -3410,21 +3544,38 @@ public class GymOwnerController {
             int year = Common.inputIntParaNullCheck(req,"year");
             int customer = Common.inputIntParaNullCheck(req,"customer");
 
-            if(gym_id!=0 && year!=0) {
+            String queryDate ="";
+            if(year!=0 && month!=0){
+
+                queryDate =year+"-"+month+"-01";
+            }else{
+
+                Calendar c = Calendar.getInstance();
+                int year1 = c.get(Calendar.YEAR);
+                int month1 = c.get(Calendar.MONTH);
+                queryDate =year1+"-"+month1+"-01";
+
+            }
+
+            Date fromDate = DATE_TIME_FORMAT.parse(queryDate);
+
+            java.sql.Date qDate = new java.sql.Date(fromDate.getTime());
+            if(gym_id!=0 && year!=0 ) {
 
                 List<Map<String, Object>> paymentsList = new ArrayList<>();
+
                 if(customer!=0 ){
-                    paymentsList = gymUserPaymentsService.getGymPaymentsFilterCustomerYear(gym_id,year,customer,offset);
+                    paymentsList = gymUserPaymentsService.getGymPaymentsFilterCustomerYear(gym_id,qDate,customer,offset);
 
                 }else if(month!=0){
-                    paymentsList = gymUserPaymentsService.getGymPaymentsFilterMonthYear(gym_id,year,month,offset);
+                    paymentsList = gymUserPaymentsService.getGymPaymentsFilterMonthYear(gym_id,qDate,offset);
                 }else {
                     paymentsList = gymUserPaymentsService.getGymPayments(gym_id, offset);
                 }
                 if (!paymentsList.isEmpty()) {
 
                     for (Map<String, Object> pay : paymentsList) {
-                        JSONObject expenseItem = new JSONObject();
+                        /*JSONObject expenseItem = new JSONObject();
 
 
                         expenseItem.put("customer", pay.get("customer"));
@@ -3435,15 +3586,32 @@ public class GymOwnerController {
                         expenseItem.put("id", pay.get("id"));
                         expenseItem.put("name", pay.get("name"));
                         expenseItem.put("paymonth", pay.get("paymonth"));
-                        expenseItem.put("payyear", pay.get("payyear"));
+                        expenseItem.put("payyear", pay.get("payyear"));*/
+
+                        JSONObject expenseItem = new JSONObject();
+
+
+                        expenseItem.put("customer",pay.get("customer"));
+                        expenseItem.put("description",pay.get("description"));
+                        expenseItem.put("subscription",pay.get("subscription"));
+                        expenseItem.put("toDate",pay.get("topaydate"));
+                        expenseItem.put("strDate",pay.get("frompaydate"));
+                        expenseItem.put("amount",pay.get("amount"));
+                        expenseItem.put("createdon",pay.get("createdon"));
+                        expenseItem.put("id",pay.get("id"));
+                        expenseItem.put("name",pay.get("name"));
+                        expenseItem.put("paymonth",pay.get("paymonth"));
+                        expenseItem.put("payyear",pay.get("payyear"));
+
 
 
                         paymentsJson.put(expenseItem);
                     }
 
+                    statusDesc = "Data fetched";
+                    status = true;
                 }
-                statusDesc = "Data fetched";
-                status = true;
+
             }else{
 
                 statusDesc = "Mandatory fields missing";
@@ -3649,7 +3817,6 @@ public class GymOwnerController {
             int duration = Common.inputIntParaNullCheck(req,"duration");
             float amount = Common.inputFloatParaNullCheck(req,"amount");
             float finalamount = Common.inputFloatParaNullCheck(req,"finalamount");
-            int year = Common.inputIntParaNullCheck(req,"year");
             String description = Common.inputStringParaNullCheck(req,"description");
             String fromdate = Common.inputStringParaNullCheck(req,"fromdate");
             int subscription = Common.inputIntParaNullCheck(req,"subscription");
@@ -3664,6 +3831,10 @@ public class GymOwnerController {
             int dayOfYear = from_cal.get(Calendar.DAY_OF_YEAR);
             from_cal.add(Calendar.MONTH, duration);
             int toDayOfYear = from_cal.get(Calendar.DAY_OF_YEAR);
+            int year = from_cal.get(Calendar.YEAR);
+
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+            String toPayDate = formatter.format(endDate);
 
 
 
@@ -3679,6 +3850,11 @@ public class GymOwnerController {
             gymUserPayments.setTodoy(toDayOfYear);
             gymUserPayments.setStatus(true);
             gymUserPayments.setPayyear(year);
+
+
+            gymUserPayments.setFrompaydate(new java.sql.Date(fromDate.getTime()));
+            gymUserPayments.setTopaydate(new java.sql.Date(endDate.getTime()));
+
             payIds.add(gymUserPaymentsService.InsertPayments(gymUserPayments).getId());
 
 

@@ -49,7 +49,7 @@ public interface GymUsersRepo extends JpaRepository<GymUsers, Integer> {
     @Query("SELECT u.name,u.phone,u.id FROM GymUsers u  WHERE  u.diet=true and u.dietplan=0 and u.created<current_date - 4 day " )
     public List<GymUsers>  findCustomerYetToAddDietPlan(  @Param("gym")int gym);
 
-    @Query("SELECT u.id as id,u.name as name,u.username as username,u.phone as phone,u.created as created,users.name as added ,u.address as address FROM GymUsers  u,GymUsers  users WHERE u.gym in( :gym ) and u.profile = :profile and u.active=true and u.addedby=users.id  order by u.id desc ")
+    @Query("SELECT u.id as id,u.name as name,u.username as username,u.phone as phone,u.created as created,users.name as added ,u.address as address,u.subscription as subscription FROM GymUsers  u,GymUsers  users WHERE u.gym in( :gym ) and u.profile = :profile and u.active=true and u.addedby=users.id  order by u.id desc ")
     public List<Map<String, Object>>  findByActiveAndProfileAndGymFull( @Param("profile")int profile, @Param("gym")int gym);
 
     @Query("SELECT u.id as id,u.profile as profile, u.name as name,u.username as username,u.phone as phone,u.created as created,users.name as added ,u.address as address FROM GymUsers  u,GymUsers  users WHERE u.gym in( :gym ) and u.profile in ( :profile1,:profile2 ) and u.active=true and u.addedby=users.id  order by u.id desc ")

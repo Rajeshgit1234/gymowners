@@ -23,15 +23,22 @@ public interface GymUserPaymentsRepo  extends JpaRepository<GymUserPayments, Int
     List<Map<String, Object>> getCustomerPayments(@Param("gym") int gym, @Param("gym") int customer, @Param("limit") int limit, @Param("offset") int offset);
 
     @Query(
-            value = "SELECT payments.id, payments.gym, payments.customer, payments.addedby, payments.amount, payments.createdon, payments.description, payments.status,payments.paymonth,payments.payyear, subscription.description as subscription,users.name FROM gym_user_payments payments,gym_users users,gym_subscription_plans subscription  where users.id=payments.customer and  payments.gym=:gym and payments.status=true and subscription.id=payments.subscription order by payments.createdon desc LIMIT :limit OFFSET :offset",
+            value = "SELECT payments.id, payments.gym, payments.customer, payments.addedby, payments.amount, payments.createdon, payments.description, payments.status,payments.paymonth,payments.payyear, subscription.description as subscription,users.name,payments.frompaydate as frompaydate,payments.topaydate as topaydate FROM gym_user_payments payments,gym_users users,gym_subscription_plans subscription  where users.id=payments.customer and  payments.gym=:gym and payments.status=true and subscription.id=payments.subscription order by payments.createdon desc LIMIT :limit OFFSET :offset",
             nativeQuery = true
     )
     List<Map<String, Object>> getGymPayments(@Param("gym") int gym, @Param("limit") int limit, @Param("offset") int offset);
-    @Query(
-            value = "SELECT payments.id, payments.gym, payments.customer, payments.addedby, payments.amount, payments.createdon, payments.description, payments.status,payments.paymonth,payments.payyear, subscription,users.name FROM gym_user_payments payments,gym_users users  where users.id=payments.customer and  payments.gym=:gym and payments.status=true and payments.paymonth=:paymonth and payments.payyear=:payyear  order by payments.paymonth,payments.id desc LIMIT :limit OFFSET :offset",
+     @Query(
+            value = "SELECT payments.id, payments.gym, payments.customer, payments.addedby, payments.amount, payments.createdon, payments.description, payments.status,payments.paymonth,payments.payyear, subscription.description as subscription,users.name,payments.fromdoy as fromdoy,payments.todoy as todoy,subscription.duration FROM gym_user_payments payments,gym_users users,gym_subscription_plans subscription  where users.id=:customer and users.id=payments.customer and  payments.status=true and subscription.id=payments.subscription order by payments.createdon desc LIMIT :limit OFFSET :offset",
             nativeQuery = true
     )
-    List<Map<String, Object>> getGymPaymentsFilterMonthYear(@Param("gym") int gym, @Param("payyear") int payyear,@Param("paymonth") int paymonth,@Param("limit") int limit, @Param("offset") int offset);
+    List<Map<String, Object>> getGymPaymentsCustomer( @Param("customer") int customer, @Param("limit") int limit, @Param("offset") int offset);
+
+
+     @Query(
+            value = "SELECT payments.id, payments.gym, payments.customer, payments.addedby, payments.amount, payments.createdon, payments.description, payments.status,payments.paymonth,payments.payyear, users.subscription,users.name,payments.fromdoy as fromdoy,payments.todoy as todoy ,payments.frompaydate as frompaydate,payments.topaydate as topaydate FROM gym_user_payments payments,gym_users users  where users.id=payments.customer and  payments.gym=:gym and payments.status=true and payments.topaydate>=:queryDate order by payments.paymonth,payments.id desc LIMIT :limit OFFSET :offset",
+            nativeQuery = true
+    )
+    List<Map<String, Object>> getGymPaymentsFilterMonthYear(@Param("gym") int gym,@Param("queryDate")  java.sql.Date queryDate, @Param("limit") int limit, @Param("offset") int offset);
 
     @Query(
             value = "SELECT sum(payments.amount) as amount,CAST(payments.createdon AS DATE)  as createdon FROM gym_user_payments payments,gym_users users  where users.id=payments.customer and  payments.gym=:gym and payments.status=true and payments.paymonth=:paymonth and payments.payyear=:payyear  group by  createdon",
@@ -54,17 +61,17 @@ public interface GymUserPaymentsRepo  extends JpaRepository<GymUserPayments, Int
     List<Map<String, Object>> getGymPaymentsFilterYear(@Param("gym") int gym,@Param("payyear") int payyear, @Param("limit") int limit, @Param("offset") int offset);
 
     @Query(
-            value = "select usertable.id as id,usertable.name as name from (select gu.id as id,gu.name as name from gym_users gu where gu.gym=:gym and gu.profile=:profile and gu.id not in (select gup.customer from gym_user_payments gup  where (gup.payyear>:year)) ) as usertable where usertable.id not in (select gup.customer from gym_user_payments gup  where (gup.todoy>:doy and gup.payyear>=:year)) order by id desc;",
+            value = "select gu.id as id,gu.name as name from gym_users gu where gu.gym=:gym and gu.profile=:profile and gu.id not in (select gup.customer from gym_user_payments gup  where gup.topaydate>=current_date) order by id desc;",
             nativeQuery = true
     )
-    List<Map<String, Object>> getpendingPaymentsList(@Param("gym") int gym,@Param("profile") int profile, @Param("year") int year, @Param("doy") int doy);
+    List<Map<String, Object>> getpendingPaymentsList(@Param("gym") int gym,@Param("profile") int profile);
 
 
     @Query(
-            value = "SELECT payments.id, payments.gym, payments.customer, payments.addedby, payments.amount, payments.createdon, payments.description, payments.status,payments.paymonth,payments.payyear, subscription,users.name FROM gym_user_payments payments,gym_users users  where users.id=payments.customer and  payments.gym=:gym and payments.status=true and payments.payyear=:payyear and payments.customer=:customer order by payments.paymonth,payments.id desc LIMIT :limit OFFSET :offset",
+            value = "SELECT payments.id, payments.gym, payments.customer, payments.addedby, payments.amount, payments.createdon, payments.description, payments.status,payments.paymonth,payments.payyear, users.subscription,users.name,payments.fromdoy as fromdoy,payments.todoy as todoy,payments.frompaydate as frompaydate,payments.topaydate as topaydate FROM gym_user_payments payments,gym_users users  where users.id=payments.customer and  payments.gym=:gym and payments.status=true and payments.topaydate>=:queryDate  and payments.customer=:customer order by payments.paymonth,payments.id desc LIMIT :limit OFFSET :offset",
             nativeQuery = true
     )
-    List<Map<String, Object>> getGymPaymentsFilterCustomerYear(@Param("gym") int gym,@Param("payyear") int payyear, @Param("customer") int customer, @Param("limit") int limit, @Param("offset") int offset);
+    List<Map<String, Object>> getGymPaymentsFilterCustomerYear(@Param("gym") int gym, @Param("queryDate")  java.sql.Date queryDate, @Param("customer") int customer, @Param("limit") int limit, @Param("offset") int offset);
 
 
 

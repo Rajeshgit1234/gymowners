@@ -23,8 +23,11 @@ public class GymUserPaymentsService {
     public List<Map<String, Object>> getGymPayments(int gym, int offset) {
         return gymUserPaymentsRepo.getGymPayments(gym,10,offset);
     }
-    public List<Map<String, Object>> getGymPaymentsFilterMonthYear(int gym, int payyear,int paymonth,int offset) {
-        return gymUserPaymentsRepo.getGymPaymentsFilterMonthYear(gym,payyear,paymonth,10,offset);
+    public List<Map<String, Object>> getGymPaymentsCustomer(int customer, int offset) {
+        return gymUserPaymentsRepo.getGymPaymentsCustomer(customer,10,offset);
+    }
+    public List<Map<String, Object>> getGymPaymentsFilterMonthYear(int gym, java.sql.Date queryDate,int offset) {
+        return gymUserPaymentsRepo.getGymPaymentsFilterMonthYear(gym,queryDate,10,offset);
     }
 
     public List<Map<String, Object>> getPaySumMonth(int gym, int payyear,int paymonth) {
@@ -38,11 +41,11 @@ public class GymUserPaymentsService {
     public List<Map<String, Object>> getGymPaymentsFilterYear(int gym, int payyear,int offset) {
         return gymUserPaymentsRepo.getGymPaymentsFilterYear(gym,payyear,10,offset);
     }
-    public List<Map<String, Object>> getpendingPaymentsList(int gym, int profile,int year,int doy) {
-        return gymUserPaymentsRepo.getpendingPaymentsList(gym,profile,year,doy);
+    public List<Map<String, Object>> getpendingPaymentsList(int gym, int profile) {
+        return gymUserPaymentsRepo.getpendingPaymentsList(gym,profile);
     }
-    public List<Map<String, Object>> getGymPaymentsFilterCustomerYear(int gym,int payyear,int customer, int offset) {
-        return gymUserPaymentsRepo.getGymPaymentsFilterCustomerYear(gym,payyear,customer,10,offset);
+    public List<Map<String, Object>> getGymPaymentsFilterCustomerYear(int gym, java.sql.Date queryDate,int customer, int offset) {
+        return gymUserPaymentsRepo.getGymPaymentsFilterCustomerYear(gym,queryDate,customer,10,offset);
     }
 
     public GymUserPayments InsertPayments(GymUserPayments gymUserPayments) {
