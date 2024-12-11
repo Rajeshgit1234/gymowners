@@ -20,11 +20,11 @@ public class GymUserPaymentsService {
     public List<Map<String, Object>> findCustomerTotalPayments(int customer, int gym, int offset) {
         return gymUserPaymentsRepo.getCustomerPayments(customer,gym,10,offset);
     }
-    public List<Map<String, Object>> getGymPayments(int gym, int offset) {
-        return gymUserPaymentsRepo.getGymPayments(gym,10,offset);
+    public List<Map<String, Object>> getGymPayments(int gym, int year,int offset) {
+        return gymUserPaymentsRepo.getGymPayments(gym,year,10,offset);
     }
     public List<Map<String, Object>> getGymPaymentsCustomer(int customer, int offset) {
-        return gymUserPaymentsRepo.getGymPaymentsCustomer(customer,10,offset);
+        return gymUserPaymentsRepo.getGymPaymentsCustomer(customer,12,offset);
     }
     public List<Map<String, Object>> getGymPaymentsFilterMonthYear(int gym, java.sql.Date queryDate,int offset) {
         return gymUserPaymentsRepo.getGymPaymentsFilterMonthYear(gym,queryDate,10,offset);

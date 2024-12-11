@@ -33,13 +33,14 @@ public class GymUserPayments {
     private Timestamp updatedon;
     private String description;
     private boolean status;
+    private boolean discountadded;
     private int subscription;
     private int fromdoy;
     private int todoy;
     private Date frompaydate;
     private Date topaydate;
 
-    public GymUserPayments(int id, int gym, int customer, int addedby, int updatedby, int paymonth, int payyear, float amount, float finalamount, Timestamp createdon, Timestamp updatedon, String description, boolean status, int subscription, int fromdoy, int todoy, Date frompaydate, Date topaydate) {
+    public GymUserPayments(int id, int gym, int customer, int addedby, int updatedby, int paymonth, int payyear, float amount, float finalamount, Timestamp createdon, Timestamp updatedon, String description, boolean status, boolean discountadded, int subscription, int fromdoy, int todoy, Date frompaydate, Date topaydate) {
         this.id = id;
         this.gym = gym;
         this.customer = customer;
@@ -53,6 +54,7 @@ public class GymUserPayments {
         this.updatedon = updatedon;
         this.description = description;
         this.status = status;
+        this.discountadded = discountadded;
         this.subscription = subscription;
         this.fromdoy = fromdoy;
         this.todoy = todoy;
@@ -166,6 +168,14 @@ public class GymUserPayments {
 
     public void setStatus(boolean status) {
         this.status = status;
+    }
+
+    public boolean isDiscountadded() {
+        return discountadded;
+    }
+
+    public void setDiscountadded(boolean discountadded) {
+        this.discountadded = discountadded;
     }
 
     public int getSubscription() {

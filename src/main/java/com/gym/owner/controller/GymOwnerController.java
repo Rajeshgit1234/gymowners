@@ -3153,8 +3153,9 @@ public class GymOwnerController {
             int offset = Integer.valueOf(offset_str);*/
             int gym_id = Common.inputIntParaNullCheck(req,"gym_id");
             int offset = Common.inputIntParaNullCheck(req,"offset");
+            int year = Common.inputIntParaNullCheck(req,"year");
 
-            List<Map<String, Object>> paymentsList= gymUserPaymentsService.getGymPayments(gym_id,offset);
+            List<Map<String, Object>> paymentsList= gymUserPaymentsService.getGymPayments(gym_id,year,offset);
 
             if(!paymentsList.isEmpty()){
 
@@ -3224,24 +3225,20 @@ public class GymOwnerController {
                 for(Map<String, Object> pay:paymentsList){
                     JSONObject expenseItem = new JSONObject();
 
-                    int fromDoy = Integer.parseInt(pay.get("fromdoy").toString());
-                    int todoy = Integer.parseInt(pay.get("todoy").toString());
-                    int payyear = Integer.parseInt(pay.get("payyear").toString());
-                    int duration = Integer.parseInt(pay.get("duration").toString());
-
-                    Year y = Year.of( payyear ) ;
-                    LocalDate toDoyld = y.atDay( todoy ) ;
-
-                    LocalDate returnvalue
-                            = toDoyld.minusMonths(duration);
-
-                    DateTimeFormatter formatterDOY = DateTimeFormatter.ofPattern("dd LLLL yyyy");
-                    String toDate = toDoyld.format(formatterDOY);
-                    String strDate = returnvalue.format(formatterDOY);
 
 
+                    String endDate = pay.get("topaydate").toString();
+                    if (new SimpleDateFormat("yyyy-MM-dd").parse(endDate).before(new Date())) {
 
+                        expenseItem.put("expired","Expired");
+
+                    }else{
+
+                        expenseItem.put("expired","Active");
+                    }
                     expenseItem.put("customer",pay.get("customer"));
+                    expenseItem.put("finalamount",pay.get("finalamount"));
+                    expenseItem.put("discountadded",pay.get("discountadded"));
                     expenseItem.put("description",pay.get("description"));
                     expenseItem.put("subscription",pay.get("subscription"));
                     expenseItem.put("amount",pay.get("amount"));
@@ -3250,8 +3247,9 @@ public class GymOwnerController {
                     expenseItem.put("name",pay.get("name"));
                     expenseItem.put("paymonth",pay.get("paymonth"));
                     expenseItem.put("payyear",pay.get("payyear"));
-                    expenseItem.put("strDate",strDate);
-                    expenseItem.put("toDate",toDate);
+                    expenseItem.put("toDate",pay.get("topaydate"));
+                    expenseItem.put("strDate",pay.get("frompaydate"));
+
 
 
 
@@ -3552,6 +3550,7 @@ public class GymOwnerController {
 
                 Calendar c = Calendar.getInstance();
                 int year1 = c.get(Calendar.YEAR);
+                year = year1;
                 int month1 = c.get(Calendar.MONTH);
                 queryDate =year1+"-"+month1+"-01";
 
@@ -3570,7 +3569,7 @@ public class GymOwnerController {
                 }else if(month!=0){
                     paymentsList = gymUserPaymentsService.getGymPaymentsFilterMonthYear(gym_id,qDate,offset);
                 }else {
-                    paymentsList = gymUserPaymentsService.getGymPayments(gym_id, offset);
+                    paymentsList = gymUserPaymentsService.getGymPayments(gym_id,year, offset);
                 }
                 if (!paymentsList.isEmpty()) {
 
@@ -3590,7 +3589,17 @@ public class GymOwnerController {
 
                         JSONObject expenseItem = new JSONObject();
 
+                        String endDate = pay.get("topaydate").toString();
+                        if (new SimpleDateFormat("yyyy-MM-dd").parse(endDate).before(new Date())) {
 
+                            expenseItem.put("expired","Expired");
+
+                        }else{
+
+                            expenseItem.put("expired","Active");
+                        }
+                        expenseItem.put("finalamount",pay.get("finalamount"));
+                        expenseItem.put("discountadded",pay.get("discountadded"));
                         expenseItem.put("customer",pay.get("customer"));
                         expenseItem.put("description",pay.get("description"));
                         expenseItem.put("subscription",pay.get("subscription"));
@@ -3809,7 +3818,7 @@ public class GymOwnerController {
         try{
             System.out.println("gymOwnerService --> addExpense "+jsonReq);
             JSONObject req = new JSONObject(jsonReq);
-
+            Boolean discountAdded = false;
 
             int gym_id = Common.inputIntParaNullCheck(req,"gym_id");
             int addedby = Common.inputIntParaNullCheck(req,"addedby");
@@ -3819,6 +3828,10 @@ public class GymOwnerController {
             float finalamount = Common.inputFloatParaNullCheck(req,"finalamount");
             String description = Common.inputStringParaNullCheck(req,"description");
             String fromdate = Common.inputStringParaNullCheck(req,"fromdate");
+            String discount = Common.inputStringParaNullCheck(req,"discount");
+            if(discount.equalsIgnoreCase("true")){
+                discountAdded=true;
+            }
             int subscription = Common.inputIntParaNullCheck(req,"subscription");
 
             Date fromDate = DATE_TIME_FORMAT.parse(fromdate);
@@ -3849,6 +3862,7 @@ public class GymOwnerController {
             gymUserPayments.setFromdoy(dayOfYear);
             gymUserPayments.setTodoy(toDayOfYear);
             gymUserPayments.setStatus(true);
+            gymUserPayments.setDiscountadded(discountAdded);
             gymUserPayments.setPayyear(year);
 
 
