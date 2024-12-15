@@ -36,6 +36,11 @@ public interface GymAttendanceRepo extends JpaRepository<GymAttendance, Integer>
 
 
 
+    @Query("select count(*) as count,attndce.doy as doy,attndce.datedoy as datedoy from (select  lttable.id as userid,lttable.name as name,att.doy as doy,att.datedoy as datedoy from  (SELECT u.id as id,u.name as name FROM GymUsers u WHERE u.gym=:gymId and u.profile=:profile and u.active=true  order by u.recentactivity desc ) as lttable left  join GymAttendance  att on lttable.id=att.userid and att.doy between :doy and :doyend ) as attndce  group by attndce.doy,attndce.datedoy order by  2 desc ")
+    public List<Map<String, Object>> fetchFullGymAttendance(@Param("gymId") int gymId,@Param("profile") int profile,@Param("doy") int doy, @Param("doyend") int doyend);
+
+
+
     @Query("select  lttable.id as userid,lttable.name as name,att.doy as doy,att.datedoy as datedoy from  (SELECT u.id as id,u.name as name FROM GymUsers u WHERE u.gym=:gymId and u.id=:customer and u.profile=:profile and u.active=true  order by u.recentactivity desc ) as lttable left  join GymAttendance  att on lttable.id=att.userid and att.doy between :doy and :doyend ")
     public List<Map<String, Object>> fetchGymCustomerAttendance(@Param("gymId") int gymId,@Param("customer") int customer,@Param("profile") int profile,@Param("doy") int doy, @Param("doyend") int doyend);
 

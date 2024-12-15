@@ -668,6 +668,160 @@ public class GymOwnerController {
     }
 
     @CrossOrigin
+    @PostMapping("/viewFullAttendanceMonth")
+    public String viewFullAttendanceMonth(@RequestBody String jsonReq) {
+
+        Boolean status = false;
+        String statusDesc = "Failed";
+        String fromdate = "";
+        String toDate = "";
+
+        LinkedHashMap<String ,String> attHash = new LinkedHashMap<>();
+        JSONObject res = new JSONObject();
+        JSONObject AttJson = new JSONObject();
+        JSONArray doyJson = new JSONArray();
+        JSONArray attJSONArray = new JSONArray();
+        JSONArray custJson = new JSONArray();
+
+        try{
+            System.out.println("gymOwnerService --> jsonReq "+jsonReq);
+            JSONObject req = new JSONObject(jsonReq);
+
+            int gym_id = Common.inputIntParaNullCheck(req,"gym_id");
+
+
+            int doyFrom = 0;
+            int doyTo = 0;
+            if( gym_id!=0  ) {
+
+
+
+                    Calendar c = Calendar.getInstance();
+                    Calendar cend = Calendar.getInstance();
+                    doyTo = c.get(Calendar.DAY_OF_YEAR);
+                    cend.roll(Calendar.DAY_OF_YEAR, -15);
+//if within the first 30 days, need to roll the year as well
+                    if(cend.after(c)){
+                        cend.roll(Calendar.YEAR, -1);
+                    }
+                    doyFrom = cend.get(Calendar.DAY_OF_YEAR);
+
+                    int fMonth = cend.get(Calendar.MONTH)+1;
+                    int tMonth = c.get(Calendar.MONTH)+1;
+                    int fDay = cend.get(Calendar.DAY_OF_MONTH);
+                    int tDay = c.get(Calendar.DAY_OF_MONTH);
+
+                    String fromM = "";
+                    String toM = "";
+                    String fromDate = "";
+                    String toDate2 = "";
+                    if(fMonth<10) {fromM="0"+fMonth; }else {fromM=String.valueOf(fMonth);};
+                    if(tMonth<10) {toM="0"+tMonth; }else {toM=String.valueOf(tMonth);};
+                    if(fDay<10) {fromDate="0"+fDay; }else {fromDate=String.valueOf(fDay);};
+                    if(tDay<10) {toDate2="0"+tDay; }else {toDate2=String.valueOf(tDay);};
+
+                    fromdate = cend.get(Calendar.YEAR)+"-"+fromM+"-"+fromDate;
+                    toDate = c.get(Calendar.YEAR)+"-"+toM+"-"+toDate2;
+
+
+
+
+
+
+
+            if(doyFrom!=0 && doyTo!=0) {
+
+
+                /*for(int i=doyFrom;i<=doyTo;i++) {
+
+                    int dayOfYear = i ;
+                    Year y = Year.of( Year.now().getValue());
+                    LocalDate ld = y.atDay( dayOfYear ) ;
+                    DateTimeFormatter dateformatter
+                            = DateTimeFormatter.ofPattern("dd/MM/yy");
+                    // display the date
+                    String date_obj = (dateformatter.format(ld));
+                    JSONObject doyJsonObj = new JSONObject();
+                    doyJsonObj.put("doy",i);
+                    doyJsonObj.put("date",date_obj);
+                    doyJson.put(doyJsonObj);
+
+                }*/
+
+                for(int i=doyTo;i>=doyFrom;i--) {
+
+                    int dayOfYear = i ;
+                    Year y = Year.of( Year.now().getValue());
+                    LocalDate ld = y.atDay( dayOfYear ) ;
+                    DateTimeFormatter dateformatter
+                            = DateTimeFormatter.ofPattern("dd/MM/yy");
+                    // display the date
+                    String date_obj = (dateformatter.format(ld));
+                    JSONObject doyJsonObj = new JSONObject();
+                    doyJsonObj.put("doy",i);
+                    doyJsonObj.put("date",date_obj);
+                    doyJson.put(doyJsonObj);
+
+                }
+
+
+
+                    List<Map<String, Object>> attendanceList= gymAttendanceService.fetchFullGymAttendance(gym_id,Year.now().getValue(),doyFrom,doyTo);
+
+                    if(!attendanceList.isEmpty()) {
+
+                        for (Map<String, Object> attendance : attendanceList) {
+                            JSONObject AttItem = new JSONObject();
+
+
+                            String count = (attendance.get("count") == null) ? "0" : attendance.get("count").toString();
+
+                            AttItem.put("count", count);
+                            AttItem.put("doy", ((attendance.get("doy") == null) ? "" : attendance.get("doy")));
+                            AttItem.put("datedoy", ((attendance.get("datedoy") == null) ? "" : attendance.get("datedoy")));
+                            attJSONArray.put(AttItem);
+
+
+                        }
+
+
+
+
+                        statusDesc = "Fetched successfully";
+                        status = true;
+                    }
+
+
+
+            }else{
+
+                statusDesc = "Invalid date";
+            }
+
+            }else{
+
+                statusDesc = "Mandatory fields are missing";
+
+            }
+
+
+        }catch(Exception e){ e.printStackTrace();}finally {
+            res.put("status",status);
+            res.put("statusDesc",statusDesc);
+            res.put("attendance",attJSONArray);
+            res.put("doyJson",doyJson);
+            res.put("custJson",custJson);
+            res.put("fromdate",fromdate);
+            res.put("toDate",toDate);
+
+        }
+        return res.toString();
+
+
+
+    }
+
+    @CrossOrigin
     @PostMapping("/viewCustomerAttendanceMonth")
     public String viewCustomerAttendanceMonth(@RequestBody String jsonReq) {
 
