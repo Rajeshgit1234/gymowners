@@ -43,5 +43,7 @@ public class GymAttendanceService {
     }
     public List<Map<String, Object>>  fetchGymAttendance(int gymId,int year,int doy,int doyend,int offset) {
         return gymAttendanceRepo.fetchGymAttendance(gymId, Common.GYM_CUSTOMERS,doy,doyend,offset);
+    }public List<Map<String, Object>>  fetchGymCustomerAttendance(int gymId,int customer,int year,int doy,int doyend) {
+        return gymAttendanceRepo.fetchGymCustomerAttendance(gymId, customer,Common.GYM_CUSTOMERS,doy,doyend);
     }
 }

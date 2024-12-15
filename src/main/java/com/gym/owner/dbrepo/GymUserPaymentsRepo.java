@@ -23,6 +23,12 @@ public interface GymUserPaymentsRepo  extends JpaRepository<GymUserPayments, Int
     List<Map<String, Object>> getCustomerPayments(@Param("gym") int gym, @Param("gym") int customer, @Param("limit") int limit, @Param("offset") int offset);
 
     @Query(
+            value = "SELECT *  FROM gym_user_payments as gup where gup.id=:paymentid and gup.status=true;",
+            nativeQuery = true
+    )
+    List<Map<String, Object>> findCustomerPaymentById(@Param("paymentid") int paymentid);
+
+    @Query(
             value = "SELECT payments.id, payments.gym, payments.customer, payments.addedby, payments.amount, payments.createdon, payments.description, payments.status,payments.paymonth,payments.payyear, subscription.description as subscription,users.name,payments.frompaydate as frompaydate,payments.topaydate as topaydate,payments.finalamount as finalamount,payments.discountadded as discountadded FROM gym_user_payments payments,gym_users users,gym_subscription_plans subscription  where users.id=payments.customer and  payments.gym=:gym and payments.status=true and payments.payyear>=:year and subscription.id=payments.subscription order by payments.createdon desc LIMIT :limit OFFSET :offset",
             nativeQuery = true
     )
@@ -41,17 +47,17 @@ public interface GymUserPaymentsRepo  extends JpaRepository<GymUserPayments, Int
     List<Map<String, Object>> getGymPaymentsFilterMonthYear(@Param("gym") int gym,@Param("queryDate")  java.sql.Date queryDate, @Param("limit") int limit, @Param("offset") int offset);
 
     @Query(
-            value = "SELECT sum(payments.amount) as amount,CAST(payments.createdon AS DATE)  as createdon FROM gym_user_payments payments,gym_users users  where users.id=payments.customer and  payments.gym=:gym and payments.status=true and payments.paymonth=:paymonth and payments.payyear=:payyear  group by  createdon",
+            value = "SELECT sum(payments.amount) as amount,CAST(payments.createdon AS DATE)  as createdon FROM gym_user_payments payments,gym_users users  where users.id=payments.customer and  payments.gym=:gym and payments.status=true and payments.topaydate>=:qDate group by  createdon",
             nativeQuery = true
     )
-    List<Map<String, Object>> getGymPaymentsMonth(@Param("gym") int gym, @Param("payyear") int payyear,@Param("paymonth") int paymonth);
+    List<Map<String, Object>> getGymPaymentsMonth(@Param("gym") int gym, @Param("qDate") java.sql.Date qDate);
 
 
     @Query(
-            value = "SELECT sum(payments.amount) as amount FROM gym_user_payments payments,gym_users users  where users.id=payments.customer and  payments.gym=:gym and payments.status=true and payments.paymonth=:paymonth and payments.payyear=:payyear",
+            value = "SELECT sum(payments.amount) as amount FROM gym_user_payments payments,gym_users users  where users.id=payments.customer and  payments.gym=:gym and payments.status=true and payments.topaydate>=:qDate",
             nativeQuery = true
     )
-    List<Map<String, Object>> getPaySumMonth(@Param("gym") int gym, @Param("payyear") int payyear,@Param("paymonth") int paymonth);
+    List<Map<String, Object>> getPaySumMonth(@Param("gym") int gym, @Param("qDate") java.sql.Date qDate);
 
 
     @Query(

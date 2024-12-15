@@ -27,7 +27,7 @@ public class GymUsersService {
 
     public List<GymUsers> findCustomerYetToAddDietPlan(Integer gym_id){
 
-        return  gymUsersRepo.findCustomerYetToAddDietPlan(gym_id);
+        return  gymUsersRepo.findCustomerYetToAddDietPlan(gym_id,Common.GYM_CUSTOMERS);
     }
     public List<Map<String, Object>> findCustomers(int gym_id, int profile_id,int offset){
 

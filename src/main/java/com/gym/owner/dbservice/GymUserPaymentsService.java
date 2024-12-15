@@ -16,7 +16,13 @@ public class GymUserPaymentsService {
     public List<GymUserPayments> findAll() {
         return gymUserPaymentsRepo.findAll();
     }
+    public List<Map<String, Object>> findCustomerPaymentById(int id) {
+        return gymUserPaymentsRepo.findCustomerPaymentById(id);
+    }
 
+    public GymUserPayments findById(int id) {
+        return gymUserPaymentsRepo.findById(id).get();
+    }
     public List<Map<String, Object>> findCustomerTotalPayments(int customer, int gym, int offset) {
         return gymUserPaymentsRepo.getCustomerPayments(customer,gym,10,offset);
     }
@@ -30,12 +36,12 @@ public class GymUserPaymentsService {
         return gymUserPaymentsRepo.getGymPaymentsFilterMonthYear(gym,queryDate,10,offset);
     }
 
-    public List<Map<String, Object>> getPaySumMonth(int gym, int payyear,int paymonth) {
-        return gymUserPaymentsRepo.getPaySumMonth(gym,payyear,paymonth);
+    public List<Map<String, Object>> getPaySumMonth(int gym, java.sql.Date qDate) {
+        return gymUserPaymentsRepo.getPaySumMonth(gym,qDate);
     }
 
-    public List<Map<String, Object>> getGymPaymentsFilterMonth(int gym, int payyear,int paymonth) {
-        return gymUserPaymentsRepo.getGymPaymentsMonth(gym,payyear,paymonth);
+    public List<Map<String, Object>> getGymPaymentsFilterMonth(int gym, java.sql.Date  qDate) {
+        return gymUserPaymentsRepo.getGymPaymentsMonth(gym,qDate);
     }
 
     public List<Map<String, Object>> getGymPaymentsFilterYear(int gym, int payyear,int offset) {
